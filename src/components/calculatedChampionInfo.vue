@@ -76,34 +76,48 @@ export default {
          let itemsHealth = this.sumValuesOf(items, "FlatHPPoolMod")
          let mythicPassiveHealth = this.legendaries(this.isMain).length * (items.includes("6662") ? 100 : 0) + this.legendaries(this.isMain).length * ((items.includes("6673") || items.includes("6664") || items.includes("3068")) ? 50 : 0)  // frostfire gauntlet and immortal shieldbow mythic passives
          let bonusMana = this.sumValuesOf(items, "FlatMPPoolMod")
+         let bonusHealth = itemsHealth + mythicPassiveHealth
 
          if(this.champion.id === "Vladimir"){   // i love vladimir
+            console.group("Vladimir")
             let itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod")
             let mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from everfrost/imperial mandate/riftmaker mythic passive
             let dreadAbilityPower = items.includes("3041") ? 125 : 0
+            let crimsonPactBonusAbilityPower = (bonusHealth) / 30
             let abilityPowerModifier = 1 + (items.includes("3089") ? 0.35 : 0)
-            let calculatedAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower) * abilityPowerModifier
+            let bonusAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower) * abilityPowerModifier
+            let calculatedAbilityPower = ((itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower) * abilityPowerModifier)
 
             let itemsAttackDamage = this.sumValuesOf(items, "FlatPhysicalDamageMod")
             let mythicPassiveAttackDamage = this.legendaries(this.isMain).length * (items.includes("6673") ? 5 : 0) + this.legendaries(this.isMain).length * (items.includes("3078") ? 3 : 0) // ad from shieldbow/trinity mythic passive
             let titanicAttackDamage = items.includes("3748") ? (itemsHealth + mythicPassiveHealth) * 0.02 : 0 // ad from titanic hydra passive
             let bonusAttackDamage = itemsAttackDamage + mythicPassiveAttackDamage + titanicAttackDamage  // needed for adaptive force calculation
 
-            let miniRuneAbilityPower = (calculatedAbilityPower > 0 && (bonusAttackDamage + 5.4) < (calculatedAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
-            
-            let crimsonPactBonusAbilityPowerBonusHealth = (itemsHealth + mythicPassiveHealth) / 30 * (abilityPowerModifier - 1) * 1.6  // vladimir is such a great champion :)
+            let miniRuneAbilityPower = (calculatedAbilityPower > 0 && (bonusAttackDamage + 5.4) < (bonusAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
 
-            var crimsonPactBonusHealth = ((calculatedAbilityPower + ((miniRuneAbilityPower + dreadAbilityPower) * abilityPowerModifier)) * 1.6) + crimsonPactBonusAbilityPowerBonusHealth
+            bonusAbilityPower += miniRuneAbilityPower * abilityPowerModifier
+
+            var crimsonPactBonusHealth = ((bonusAbilityPower + ((miniRuneAbilityPower + dreadAbilityPower) * abilityPowerModifier)) - crimsonPactBonusAbilityPower) * 1.6
+            let darkPactAbilityPower = items.includes("4637") ? ((bonusHealth + crimsonPactBonusHealth) * 0.02) : 0   // demonic embrace passive
+
+            // calculatedAbilityPower += darkPactAbilityPower * abilityPowerModifier
+            // var crimsonPactBonusHealth = (calculatedAbilityPower + ((miniRuneAbilityPower + dreadAbilityPower - crimsonPactBonusAbilityPower) * abilityPowerModifier)) * 1.6
+
+            console.log("bonus ap", bonusAbilityPower)
+            console.log("crimson pact bonus hp", crimsonPactBonusHealth, "ap", crimsonPactBonusAbilityPower)
+            console.log("demonic embrace ap", darkPactAbilityPower)
+            console.groupEnd("Vladimir")
          } else {
             var crimsonPactBonusHealth = 0
          }
+         bonusHealth += crimsonPactBonusHealth
 
          let livingForgeHealthModifier = this.champion.id === "Ornn" ? items.find(item => this.mythics.includes(item)) ? 1.14 : 1.1 : 1  // ornn passive
          const health = Array.from({length: 18}, (_, level) => {
             let maxMana = this.calculateStat(this.champion.stats.mp, level + 1, this.champion.stats.mpperlevel) + bonusMana
             let healthFromLevel = this.calculateStat(this.champion.stats.hp, level + 1, this.champion.stats.hpperlevel)
             let aweHealth = ((items.includes("3119") || items.includes("3121")) && this.champion.partype === "Mana" ? maxMana * 0.08 : 0)   // health from winter's approach/fimbulwinter awe passive
-            return this.champion.id !== "Pyke" ? Math.round(healthFromLevel + ((itemsHealth + mythicPassiveHealth + crimsonPactBonusHealth + aweHealth) * livingForgeHealthModifier)) : Math.round(healthFromLevel)
+            return this.champion.id !== "Pyke" ? Math.round(healthFromLevel + ((bonusHealth + aweHealth) * livingForgeHealthModifier)) : Math.round(healthFromLevel)
          })
 
          calculated.health = health
@@ -127,6 +141,7 @@ export default {
             let itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod")
             let mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from imperial mandate/everfrost/riftmaker mythic passive
             let crimsonPactBonusAbilityPower = this.champion.id === "Vladimir" ? (itemsHealth + mythicPassiveHealth) / 30 : 0  // did i mention vladimir is my favourite champion?
+            // console.log("crimson pact bonus ap", crimsonPactBonusAbilityPower)
             let dreadAbilityPower = items.includes("3041") ? 125 : 0
             let abilityPowerModifier = 1 + (items.includes("3089") ? 0.35 : 0)
 
@@ -144,11 +159,13 @@ export default {
                
                // let aweAbilityPower = ((items.includes("3003") && this.champion.partype === "Mana") ? 0.03 : (items.includes("3003") && this.champion.partype === "Mana") ? 0.05 : 0) * bonusMana
                let aweAbilityPower = 0 // 11.23.1 seraph/archangel changes
-               let calculatedAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower + aweAbilityPower) * abilityPowerModifier
+               let darkPactAbilityPower = items.includes("4637") ? ((bonusHealth + aweHealth) * 0.02) : 0   // demonic embrace passive
+               // console.log("demonic embrace ap", darkPactAbilityPower)
+               let calculatedAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower + aweAbilityPower + darkPactAbilityPower) * abilityPowerModifier
 
                let miniRuneAbilityPower = (calculatedAbilityPower > 0 && (bonusAttackDamage + (5.4 * whisperAttackDamageModifier)) < (calculatedAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
                let miniRuneAttackDamage = miniRuneAbilityPower === 0 ? (5.4 * whisperAttackDamageModifier) : 0
-               // miniRuneAttackDamage = 0
+
                const totalAttackDamage = (attackDamageFromLevel * whisperAttackDamageModifier) + bonusAttackDamage + miniRuneAttackDamage
                const totalAbilityPower = calculatedAbilityPower + ((miniRuneAbilityPower + dreadAbilityPower) * abilityPowerModifier)
 
@@ -222,11 +239,17 @@ export default {
          
          if(this.isMain){
             calculated.attackDamage = Math.round(calculated.attackDamage[this.level - 1])
-            // calculated.abilityPower = Math.round(calculated.abilityPower[this.level - 1])
-            delete calculated.abilityPower
+            if(this.apVisibility){
+               calculated.abilityPower = Math.round(calculated.abilityPower[this.level - 1])
+            } else{
+               delete calculated.abilityPower
+            }
             calculated.armorPenetration = `${calculated.armorPenetration[0]} | ${calculated.armorPenetration[1]}%`
-            // calculated.magicPenetration = `${calculated.magicPenetration[0]} | ${calculated.magicPenetration[1]}%`
-            delete calculated.magicPenetration
+            if(this.apVisibility){
+               calculated.magicPenetration = `${calculated.magicPenetration[0]} | ${calculated.magicPenetration[1]}%`
+            } else{
+               delete calculated.magicPenetration
+            }
             delete calculated.health
             calculated.criticalStrike = `${calculated.criticalStrike[0]}% | ${calculated.criticalStrike[1]}%`
             calculated.attackSpeed = calculated.attackSpeed[this.level - 1]
@@ -248,6 +271,9 @@ export default {
          return Object.keys(this.baseStats).filter(key => {
                return this.baseStats[key] != undefined
          }).reduce((obj, key) => {return {...obj, [key]: this.baseStats[key]}}, {})
+      },
+      apVisibility(){
+         return this.$store.getters.getApVisibility
       }
    }
 }

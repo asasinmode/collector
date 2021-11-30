@@ -1,5 +1,5 @@
 import { createStore } from 'vuex'; import * as championData from '@/assets/champion.json'; import * as itemData from '@/assets/item.json'
-const uselessItems = [1035, 1039, 1040, 2003, 2010, 2031, 2033, 2052, 2055, 2138, 2139, 2140, 2403, 2419, 2420, 2421, 2423, 2424, 3599, 3600, 4403, 3330, 3340, 3363, 3364, 3400]
+const uselessItems = [1035, 1039, 1040, 2003, 2010, 2031, 2033, 2052, 2055, 2138, 2139, 2140, 2403, 2419, 2420, 2421, 2423, 2424, 3513, 3599, 3600, 4403, 3330, 3340, 3363, 3364, 3400]
 uselessItems.forEach(item => {delete itemData.data[item]})
 
 export default createStore({
@@ -51,6 +51,7 @@ export default createStore({
          {id: "3748", description: "bonus attack damage equal to 2% bonus health."}, // titanic hydra
          {id: "4005", description: "+15 ability power per other legendary item."}, // imperial mandate
          {id: "4633", description: "+8 ability power per other legendary item."}, // riftmaker
+         {id: "4637", description: "bonus ability power equal to 2% bonus health."}, // demonic embrace
          {id: "4644", description: "+8 ability power per other legendary item."}, // crown of the shattered queen
          {id: "6632", description: "+5% armor penetration and magic penetration per other legendary item."}, // divine sunderer
          {id: "6656", description: "+10 ability power per other legendary item."}, // everfrost
@@ -105,7 +106,8 @@ export default createStore({
          target: {}
       },
       showModeTooltips: true,
-      itemGroupsCheck: true
+      itemGroupsCheck: true,
+      apVisibility: false,
    },
    mutations: {
       setMainChampion(state, payload){
@@ -141,6 +143,9 @@ export default createStore({
       },
       setItemGroupsCheck(state){
          state.itemGroupsCheck = !state.itemGroupsCheck
+      },
+      setApVisibility(state){
+         state.apVisibility = !state.apVisibility
       }
    },
    actions: {
@@ -199,6 +204,9 @@ export default createStore({
       },
       getItemGroupsCheck(state){
          return state.itemGroupsCheck
+      },
+      getApVisibility(state){
+         return state.apVisibility
       }
    }
 })

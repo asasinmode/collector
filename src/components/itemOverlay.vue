@@ -1,7 +1,7 @@
 <template>
    <div class="modalOverlay" @click.self="$emit('closeMe')">
       <div class="modalContainer">
-         <img v-for="(item, name) in items" :key="item.key" @click="selectItem(name, isMain)" @click.right.prevent="selectItem(name, !isMain)" :title="item.name" :class="{selected: selectedItems(isMain).includes(name)}" :src="`http://ddragon.leagueoflegends.com/cdn/${patch}/img/item/${item.image.full}`" loading="lazy">
+         <img v-for="item in sortedItems" :key="item.id" @click="selectItem(item.id, isMain)" @click.right.prevent="selectItem(item.id, !isMain)" :title="item.name" :class="{selected: selectedItems(isMain).includes(item.id)}" :src="`http://ddragon.leagueoflegends.com/cdn/${patch}/img/item/${item.image.full}`" loading="lazy">
       </div>
    </div>
 </template>
@@ -36,6 +36,7 @@ export default {
       },
       selectItem(itemName, isForMe){
          let tempCopy = [...this.selectedItems(isForMe)]
+         console.log(itemName)
          if(tempCopy.includes(itemName)){
             tempCopy = tempCopy.filter(item => item != itemName)
          } else{
@@ -65,6 +66,9 @@ export default {
       },
       items(){
          return this.$store.getters.getAllItems
+      },
+      sortedItems(){
+         return Object.keys(this.items).map(key => {return {id: key, ...this.items[key]}}).sort((a, b) => a.gold.total - b.gold.total)
       },
       itemGroupsCheck(){
          return this.$store.getters.getItemGroupsCheck

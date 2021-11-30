@@ -103,6 +103,17 @@
                </div>
                <p>Toggles the visibility of graph settings tooltips.</p>
             </div>
+            <div class="infoToggleContainer">
+               <h3 class="centered">toggle ap/magic penetration visibility</h3>
+               <div class="infoToggleButtonContainer centered">
+                  <button class="button infoToggleButton" @click="toggle('setApVisibility')">
+                     <div>on</div>
+                     <div>off</div>
+                     <div class="infoToggleButtonHighlight" :class="{on: apVisibility}" />
+                  </button>
+               </div>
+               <p>Toggles the visibility of ability power and magic penetration on main champion.</p>
+            </div>
          </div>
          <div class="infoContent" v-else-if="infoIndex === 4">
             <p>Unless it's heavily requested I won't put up the calculation formulas, since making them readable is going to take a lot of time (and most of them aren't pretty looking).</p><br/>
@@ -161,6 +172,9 @@ export default {
       showModeTooltips(){
          return this.$store.getters.getShowModeTooltips
       },
+      apVisibility(){
+         return this.$store.getters.getApVisibility
+      }
    }
 }
 </script>
