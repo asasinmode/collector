@@ -83,28 +83,31 @@ export default {
             let itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod")
             let mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from everfrost/imperial mandate/riftmaker mythic passive
             let dreadAbilityPower = items.includes("3041") ? 125 : 0
-            let crimsonPactBonusAbilityPower = (bonusHealth) / 30
+            let crimsonPactBonusAbilityPower = bonusHealth / 30
             let abilityPowerModifier = 1 + (items.includes("3089") ? 0.35 : 0)
-            let bonusAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower) * abilityPowerModifier
-            let calculatedAbilityPower = ((itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower) * abilityPowerModifier)
+            let bonusAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower) * abilityPowerModifier
 
             let itemsAttackDamage = this.sumValuesOf(items, "FlatPhysicalDamageMod")
             let mythicPassiveAttackDamage = this.legendaries(this.isMain).length * (items.includes("6673") ? 5 : 0) + this.legendaries(this.isMain).length * (items.includes("3078") ? 3 : 0) // ad from shieldbow/trinity mythic passive
             let titanicAttackDamage = items.includes("3748") ? (itemsHealth + mythicPassiveHealth) * 0.02 : 0 // ad from titanic hydra passive
             let bonusAttackDamage = itemsAttackDamage + mythicPassiveAttackDamage + titanicAttackDamage  // needed for adaptive force calculation
 
-            let miniRuneAbilityPower = (calculatedAbilityPower > 0 && (bonusAttackDamage + 5.4) < (bonusAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
+            let miniRuneAbilityPower = (bonusAbilityPower > 0 && (bonusAttackDamage + 5.4) < (bonusAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
 
             bonusAbilityPower += miniRuneAbilityPower * abilityPowerModifier
 
-            var crimsonPactBonusHealth = ((bonusAbilityPower + ((miniRuneAbilityPower + dreadAbilityPower) * abilityPowerModifier)) - crimsonPactBonusAbilityPower) * 1.6
-            let darkPactAbilityPower = items.includes("4637") ? ((bonusHealth + crimsonPactBonusHealth) * 0.02) : 0   // demonic embrace passive
+            var crimsonPactBonusHealth = ((bonusAbilityPower + (dreadAbilityPower * abilityPowerModifier)) - Math.floor(crimsonPactBonusAbilityPower)) * 1.6   // for some reason rounding it down works :)
+            let darkPactAbilityPower = items.includes("4637") ? ((bonusHealth + crimsonPactBonusHealth) * 0.02) : 0   // initial demonic embrace
 
-            // calculatedAbilityPower += darkPactAbilityPower * abilityPowerModifier
-            // var crimsonPactBonusHealth = (calculatedAbilityPower + ((miniRuneAbilityPower + dreadAbilityPower - crimsonPactBonusAbilityPower) * abilityPowerModifier)) * 1.6
+            let crimsonPactBonusHealthBeforeEmbrace = crimsonPactBonusHealth
+            crimsonPactBonusHealth += darkPactAbilityPower * abilityPowerModifier * 1.6
+            let darkPactAbilityPowerBeforeCrimsonPact = darkPactAbilityPower
+            darkPactAbilityPower += items.includes("4637") ? (crimsonPactBonusHealth - crimsonPactBonusHealthBeforeEmbrace) * 0.02 : 0
+            crimsonPactBonusHealth += (darkPactAbilityPower - darkPactAbilityPowerBeforeCrimsonPact) * abilityPowerModifier * 1.6
 
-            console.log("bonus ap", bonusAbilityPower)
-            console.log("crimson pact bonus hp", crimsonPactBonusHealth, "ap", crimsonPactBonusAbilityPower)
+            console.log("items ap", (itemsAbilityPower + mythicPassiveAbilityPower) * abilityPowerModifier, "ap z vlad passive", crimsonPactBonusAbilityPower * abilityPowerModifier, "rune", miniRuneAbilityPower * abilityPowerModifier, "total", bonusAbilityPower)
+            console.log("crimson pact bonus hp", crimsonPactBonusHealth, "ap", crimsonPactBonusAbilityPower, Math.floor(crimsonPactBonusAbilityPower))
+            console.log("hp for", (bonusAbilityPower + ((darkPactAbilityPower + dreadAbilityPower) * abilityPowerModifier)) - crimsonPactBonusAbilityPower)
             console.log("demonic embrace ap", darkPactAbilityPower)
             console.groupEnd("Vladimir")
          } else {

@@ -43,6 +43,7 @@ export default createStore({
          {id: "3042", description: "bonus attack damage equal to 2.5% maximum mana."}, // muramana
          {id: "3047", description: "reduces damage from basic attacks by 12%."}, // plated steelcaps
          {id: "3078", description: "3 bonus attack damage per other legendary item."}, // trinity force
+         {id: "3089", description: "increases ability power by 35%."}, // rabadon's deathcap
          {id: "3091", description: "15-80 bonus magic damage on hit based on level."}, // wit's end
          {id: "3115", description: "15 + 20% ap bonus magic damage on hit."}, // nashor's tooth
          {id: "3119", description: "bonus health equal to 8% maximum mana."}, // winter's approach
