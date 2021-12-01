@@ -79,7 +79,6 @@ export default {
          let bonusHealth = itemsHealth + mythicPassiveHealth
 
          if(this.champion.id === "Vladimir"){   // i love vladimir
-            console.group("Vladimir")
             let itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod")
             let mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from everfrost/imperial mandate/riftmaker mythic passive
             let dreadAbilityPower = items.includes("3041") ? 125 : 0
@@ -104,12 +103,6 @@ export default {
             let darkPactAbilityPowerBeforeCrimsonPact = darkPactAbilityPower
             darkPactAbilityPower += items.includes("4637") ? (crimsonPactBonusHealth - crimsonPactBonusHealthBeforeEmbrace) * 0.02 : 0
             crimsonPactBonusHealth += (darkPactAbilityPower - darkPactAbilityPowerBeforeCrimsonPact) * abilityPowerModifier * 1.6
-
-            console.log("items ap", (itemsAbilityPower + mythicPassiveAbilityPower) * abilityPowerModifier, "ap z vlad passive", crimsonPactBonusAbilityPower * abilityPowerModifier, "rune", miniRuneAbilityPower * abilityPowerModifier, "total", bonusAbilityPower)
-            console.log("crimson pact bonus hp", crimsonPactBonusHealth, "ap", crimsonPactBonusAbilityPower, Math.floor(crimsonPactBonusAbilityPower))
-            console.log("hp for", (bonusAbilityPower + ((darkPactAbilityPower + dreadAbilityPower) * abilityPowerModifier)) - crimsonPactBonusAbilityPower)
-            console.log("demonic embrace ap", darkPactAbilityPower)
-            console.groupEnd("Vladimir")
          } else {
             var crimsonPactBonusHealth = 0
          }
@@ -144,7 +137,7 @@ export default {
             let itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod")
             let mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from imperial mandate/everfrost/riftmaker mythic passive
             let crimsonPactBonusAbilityPower = this.champion.id === "Vladimir" ? (itemsHealth + mythicPassiveHealth) / 30 : 0  // did i mention vladimir is my favourite champion?
-            // console.log("crimson pact bonus ap", crimsonPactBonusAbilityPower)
+
             let dreadAbilityPower = items.includes("3041") ? 125 : 0
             let abilityPowerModifier = 1 + (items.includes("3089") ? 0.35 : 0)
 
