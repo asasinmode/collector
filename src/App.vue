@@ -114,8 +114,6 @@ p.indent{
    top: 5rem;
    transform: translateX(-50%);
    background: var(--bg1);
-   display: flex;
-   flex-direction: column;
    box-shadow: 0 0 0.25em 0 var(--highlight1), 0 0 0.75em 0 var(--highlight2);
    padding: 1em;
    min-width: 20rem;
@@ -183,5 +181,22 @@ p.indent{
    height: 5px;
    border-radius: 50%;
    background: var(--accent1);
+}
+.searchbarContainer{
+   padding-bottom: 1em;
+}
+.searchbar{
+   background: transparent;
+   color: var(--main1);
+   border: 1.5px solid var(--main2);
+   border-radius: 4px;
+   padding: 0.5em 0.5em 0.55em 0.5em;
+}
+.searchbar:hover{
+   border-color: var(--main1);
+}
+.searchbar:focus{
+   border-color: var(--main1);
+   outline: 0.25px solid var(--main1);
 }
 </style>

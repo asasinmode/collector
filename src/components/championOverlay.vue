@@ -1,7 +1,10 @@
 <template>
    <div class="modalOverlay" @click.self="$emit('closeMe')">
       <div class="modalContainer">
-         <img v-for="champion in champions" :key="champion.key" @click="selectChampion(champion.id, true)" @click.right.prevent="selectChampion(champion.id, false)" :class="{'main': main?.id === champion.id, 'target': target?.id === champion.id}" :src="`http://ddragon.leagueoflegends.com/cdn/${patch}/img/champion/${champion.image.full}`">
+         <div class="searchbarContainer centered">
+            <input type="text" class="searchbar" v-model="textFilter" placeholder="search for item..." />
+         </div>
+         <img v-for="champion in filteredChampions" :key="champion.key" @click="selectChampion(champion.id, true)" @click.right.prevent="selectChampion(champion.id, false)" :class="{'main': main?.id === champion.id, 'target': target?.id === champion.id}" :src="`http://ddragon.leagueoflegends.com/cdn/${patch}/img/champion/${champion.image.full}`">
       </div>
    </div>
 </template>
@@ -10,6 +13,11 @@
 export default {
    name: "championOverlay",
    emits: ['closeMe', 'selectChampion'],
+   data(){
+      return {
+         textFilter: ""
+      }
+   },
    methods: {
       selectChampion(champion, isMain){
          this.$emit('selectChampion', champion, isMain)
@@ -22,11 +30,17 @@ export default {
       champions(){
          return this.$store.getters.getAllChampions
       },
+      sortedChampions(){
+         return Object.keys(this.champions).map(key => {return {key: key, ...this.champions[key]}})
+      },
       main(){
          return this.$store.getters.getMainChampion
       },
       target(){
          return this.$store.getters.getTargetChampion
+      },
+      filteredChampions(){
+         return this.textFilter != "" ? this.sortedChampions.filter(champion => champion.name.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1) : this.champions
       }
    }
 }
@@ -34,10 +48,12 @@ export default {
 
 <style scoped>
 .modalContainer{
-   display: unset;
    max-height: 30em;
    overflow-y: auto;
    overflow-x: hidden;
+}
+.searchbar{
+   width: 100%;
 }
 img{
    cursor: pointer;
@@ -77,6 +93,10 @@ img.main.target{
 @media (min-width: 768px) {
    img{
       width: calc((100% / 8) - 0.1em);
+   }
+   .modalContainer{
+      width: 40em;
+      height: 30em;
    }
 }
 </style>

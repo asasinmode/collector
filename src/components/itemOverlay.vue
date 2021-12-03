@@ -1,7 +1,10 @@
 <template>
    <div class="modalOverlay" @click.self="$emit('closeMe')">
       <div class="modalContainer">
-         <img v-for="item in sortedItems" :key="item.id" @click="selectItem(item.id, isMain)" @click.right.prevent="selectItem(item.id, !isMain)" :title="item.name" :class="{selected: selectedItems(isMain).includes(item.id)}" :src="`http://ddragon.leagueoflegends.com/cdn/${patch}/img/item/${item.image.full}`" loading="lazy">
+         <div class="searchbarContainer centered">
+            <input type="text" class="searchbar" v-model="textFilter" placeholder="search for item..." />
+         </div>
+         <img v-for="item in filteredItems" :key="item.id" @click="selectItem(item.id, isMain)" @click.right.prevent="selectItem(item.id, !isMain)" :title="item.name" :class="{selected: selectedItems(isMain).includes(item.id)}" :src="`http://ddragon.leagueoflegends.com/cdn/${patch}/img/item/${item.image.full}`" loading="lazy">
       </div>
    </div>
 </template>
@@ -27,7 +30,8 @@ export default {
             ["3003", "3004", "3040", "3042", "3070", "3119", "3121"], // mana charge
             ["3139", "3140", "6035"],  // quicksilver
             ["3135", "4630"]  // void pen
-         ]
+         ],
+         textFilter: ""
       }
    },
    methods: {
@@ -70,6 +74,9 @@ export default {
       sortedItems(){
          return Object.keys(this.items).map(key => {return {id: key, ...this.items[key]}}).sort((a, b) => a.gold.total - b.gold.total)
       },
+      filteredItems(){
+         return this.textFilter != "" ? this.sortedItems.filter(item => item.name.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1) : this.sortedItems
+      },
       itemGroupsCheck(){
          return this.$store.getters.getItemGroupsCheck
       }
@@ -79,7 +86,6 @@ export default {
 
 <style scoped>
 .modalContainer{
-   display: unset;
    max-height: 30em;
    overflow-y: auto;
    overflow-x: hidden;
@@ -103,9 +109,16 @@ img.selected{
    filter: brightness(1);
    outline: 2px solid var(--accent1);
 }
+.searchbar{
+   width: 100%;
+}
 @media (min-width: 768px) {
    img{
       width: calc((100% / 8) - 0.2em);
+   }
+   .modalContainer{
+      width: 40em;
+      height: 30em;
    }
 }
 </style>
