@@ -79,7 +79,7 @@ export default {
                bodyFont: {size: 12},
                callbacks: {
                   title: (context) => {
-                     return this.levelSetting === "Equal" ? `${context[0].label} vs ${context[0].label}` : this.levelSetting === "SelectedChanging" ? `${this.level(true)} vs ${context[0].label}` : `${context[0].label} vs ${this.level(false)}`
+                     return this.levelSetting === "Equal" ? `${context[0].label} lvl vs ${context[0].label} lvl` : this.levelSetting === "SelectedChanging" ? `${this.level(true)} lvl vs ${context[0].label} lvl` : `${context[0].label} lvl vs ${this.level(false)} lvl`
                   }
                },
             }

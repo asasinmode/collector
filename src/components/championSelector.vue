@@ -60,6 +60,7 @@
             <p>Some <strong>champion innate passives</strong> that didn't strike to me as having a big impact on calculations or they seemed too complicated to implement. If you think they matter, consider visiting the <b>about</b> tab to see where you can contact me.</p>
             <p>List of champion passives <strong>not</strong> accounted for (that I think matter)</p>
                <p class="fakeList">Akshan</p>
+               <p class="fakeList">Aphelios</p>
                <p class="fakeList">Fizz</p>
                <p class="fakeList">Graves</p>
                <p class="fakeList">Kassadin</p>

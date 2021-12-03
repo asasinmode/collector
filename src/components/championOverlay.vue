@@ -2,7 +2,7 @@
    <div class="modalOverlay" @click.self="$emit('closeMe')">
       <div class="modalContainer">
          <div class="searchbarContainer centered">
-            <input type="text" class="searchbar" v-model="textFilter" placeholder="search for item..." />
+            <input type="text" class="searchbar" v-model="textFilter" placeholder="search for champion..." />
          </div>
          <img v-for="champion in filteredChampions" :key="champion.key" @click="selectChampion(champion.id, true)" @click.right.prevent="selectChampion(champion.id, false)" :class="{'main': main?.id === champion.id, 'target': target?.id === champion.id}" :src="`http://ddragon.leagueoflegends.com/cdn/${patch}/img/champion/${champion.image.full}`">
       </div>

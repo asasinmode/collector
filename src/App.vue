@@ -199,4 +199,10 @@ p.indent{
    border-color: var(--main1);
    outline: 0.25px solid var(--main1);
 }
+@media (max-height: 512px) {
+   .modalContainer{
+      top: 1rem;
+      max-height: 15em !important;
+   }
+}
 </style>
