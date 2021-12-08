@@ -25,7 +25,7 @@
             <div class="centered">
                <strong style="color: hsl(0, 100%, 45%);">There are no major updates planned for the site unless it's actually used by people.</strong></div><br/>
             <div class="centered">
-               Current patch:<b style="margin-left: 0.5em;">11.23.1</b>
+               Current patch:<b style="margin-left: 0.5em;">11.24.1</b>
             </div>
          </div>
          <div class="infoContent" v-else-if="infoIndex === 1">
@@ -81,6 +81,12 @@
             <p>If you want to turn off the tooltips above graph settings buttons visit the <b>toggles</b> tab.</p>
          </div>
          <div class="infoContent" v-else-if="infoIndex === 3">
+            <p>Unless it's heavily requested I won't put up the calculation formulas, since making them readable is going to take a lot of time (and most of them aren't pretty looking).</p><br/>
+            <p>I verified the damage shown by the site and it seems to be almost <b>100% accurate</b> (in situations where all variables are accounted for), but if you notice something's not right visit the <b>about</b> tab to see where you can contact me.</p><br/>
+            <p>To see what stuff I accounted for in calculations visit the <b>disclaimers</b> tab.</p><br/>
+            <p><i>That being said you can look around the source code <a href="https://github.com/asasinmode/collector/" target="_blank">here</a>.</i></p>
+         </div>
+         <div class="infoContent" v-else-if="infoIndex === 4">
             <div class="infoToggleContainer">
                <h3 class="centered">toggle item groups</h3>
                <div class="infoToggleButtonContainer centered">
@@ -115,12 +121,6 @@
                </div>
                <p>Toggles the visibility of ability power and magic penetration on main champion.</p>
             </div>
-         </div>
-         <div class="infoContent" v-else-if="infoIndex === 4">
-            <p>Unless it's heavily requested I won't put up the calculation formulas, since making them readable is going to take a lot of time (and most of them aren't pretty looking).</p><br/>
-            <p>I verified the damage shown by the site and it seems to be almost <b>100% accurate</b> (in situations where all variables are accounted for), but if you notice something's not right visit the <b>about</b> tab to see where you can contact me.</p><br/>
-            <p>To see what stuff I accounted for in calculations visit the <b>disclaimers</b> tab.</p><br/>
-            <p><i>That being said you can look around the source code <a href="https://github.com/asasinmode/collector/" target="_blank">here</a>.</i></p>
          </div>
          <div class="infoContent" v-else-if="infoIndex === 5">
             <p>If you notice something's not working correctly, have any feedback, feature requests or questions contact me on discord <b>asasinmode#0058</b>.</p><br/>
