@@ -31,7 +31,7 @@ export default {
          return this.$store.getters.getAllChampions
       },
       sortedChampions(){
-         return Object.keys(this.champions).map(key => {return {key: key, ...this.champions[key]}})
+         return Object.keys(this.champions).map(key => {return {key: key, ...this.champions[key]}}).sort((a, b) => a.name > b.name ? 1 : -1)
       },
       main(){
          return this.$store.getters.getMainChampion
@@ -47,7 +47,7 @@ export default {
                rv = rv ? true : tag.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1
             })
             return rv
-         }) : this.champions
+         }) : this.sortedChampions
       }
    }
 }
