@@ -40,7 +40,14 @@ export default {
          return this.$store.getters.getTargetChampion
       },
       filteredChampions(){
-         return this.textFilter != "" ? this.sortedChampions.filter(champion => champion.name.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1) : this.champions
+         return this.textFilter != "" ? this.sortedChampions.filter(champion => {
+            let rv = false
+            rv = champion.name.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1
+            champion.tags.forEach(tag => {
+               rv = tag.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1
+            })
+            return rv
+         }) : this.champions
       }
    }
 }

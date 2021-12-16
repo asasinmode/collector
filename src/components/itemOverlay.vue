@@ -75,7 +75,15 @@ export default {
          return Object.keys(this.items).map(key => {return {id: key, ...this.items[key]}}).sort((a, b) => a.gold.total - b.gold.total)
       },
       filteredItems(){
-         return this.textFilter != "" ? this.sortedItems.filter(item => item.name.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1) : this.sortedItems
+         return this.textFilter != "" ? this.sortedItems.filter(item => {
+            let rv = false
+            rv = item.name.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1
+            item.tags.forEach(tag => {
+               rv = tag.toLowerCase().replace(/( |')/g, "").indexOf(this.textFilter.toLowerCase().replace(/( |')/g, "")) != -1
+            })
+            return rv
+         }
+         ) : this.sortedItems
       },
       itemGroupsCheck(){
          return this.$store.getters.getItemGroupsCheck
