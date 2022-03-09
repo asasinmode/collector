@@ -25,7 +25,7 @@
             <div class="centered">
                <strong style="color: hsl(0, 100%, 45%);">There are no major updates planned for the site unless it's actually used by people.</strong></div><br/>
             <div class="centered">
-               Current patch:<b style="margin-left: 0.5em;">12.5.1</b>
+               Current patch:<b style="margin-left: 0.5em;">{{patch}}</b>
             </div>
          </div>
          <div class="infoContent" v-else-if="infoIndex === 1">
@@ -175,7 +175,10 @@ export default {
       },
       apVisibility(){
          return this.$store.getters.getApVisibility
-      }
+      },
+      patch(){
+         return this.$store.getters.getPatch
+      },
    }
 }
 </script>
