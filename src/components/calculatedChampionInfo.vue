@@ -74,7 +74,7 @@ export default {
          const miniRuneAttackSpeed = 0.1, miniRuneArmor = 6
 
          let itemsHealth = this.sumValuesOf(items, "FlatHPPoolMod")
-         let mythicPassiveHealth = this.legendaries(this.isMain).length * (items.includes("6662") ? 100 : 0) + this.legendaries(this.isMain).length * ((items.includes("6673") || items.includes("6664") || items.includes("3068")) ? 50 : 0)  // frostfire gauntlet and immortal shieldbow mythic passives
+         let mythicPassiveHealth = this.legendaries(this.isMain).length * (items.includes("6662") ? 100 : 0) + this.legendaries(this.isMain).length * ((items.includes("6664") || items.includes("3068")) ? 50 : items.includes("6673") ? 70 : 0)  // frostfire gauntlet / sunfire aegis and turbochemtank / immortal shieldbow mythic passives
          let bonusMana = this.sumValuesOf(items, "FlatMPPoolMod")
          let bonusHealth = itemsHealth + mythicPassiveHealth
 

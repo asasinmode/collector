@@ -4,7 +4,7 @@ uselessItems.forEach(item => {delete itemData.data[item]})
 
 export default createStore({
    state: {
-      patch: '12.5.1',
+      patch: '12.6.1',
       champions: championData.data,
       items: itemData.data,
       mythics: ["6693", "6692", "6691", "6673", "6672", "6671", "6664", "6662", "6656", "6655", "6653", "6632", "6631", "6630", "6617", "6616", "4644", "4636", "4633", "4005", "3190", "3152", "3078", "3068", "3001", "2065"],
@@ -42,6 +42,7 @@ export default createStore({
          {id: "3041", description: "+125 ability power (fully stacked)."}, // mejai
          {id: "3042", description: "bonus attack damage equal to 2.5% maximum mana."}, // muramana
          {id: "3047", description: "reduces damage from basic attacks by 12%."}, // plated steelcaps
+         {id: "3068", description: "+50 health per other legendary item."},   // sunfire aegis
          {id: "3078", description: "3 bonus attack damage per other legendary item."}, // trinity force
          {id: "3089", description: "increases ability power by 35%."}, // rabadon's deathcap
          {id: "3091", description: "15-80 bonus magic damage on hit based on level."}, // wit's end
@@ -57,8 +58,9 @@ export default createStore({
          {id: "6632", description: "+5% armor penetration and magic penetration per other legendary item."}, // divine sunderer
          {id: "6656", description: "+10 ability power per other legendary item."}, // everfrost
          {id: "6662", description: "+100 health per other legendary item."},   // frostfire gauntlet
+         {id: "6664", description: "+50 health per other legendary item."},   // turbo chemtank
          {id: "6672", description: "+10% bonus attack speed per other legendary item."},  // kraken slayer
-         {id: "6673", description: "+5 attack damage, +50 health per other legendary item."},   // immortal shieldbow
+         {id: "6673", description: "+5 attack damage, +70 health per other legendary item."},   // immortal shieldbow
          // {id: "6676", description: "reduces target health by 5%."},   // collector
          {id: "6677", description: "35 bonus physical damage on-hit per 20% critical strike chance."},   // rageclaw
          {id: "6692", description: "+4% armor penetration per other legendary item."}, // eclipse
