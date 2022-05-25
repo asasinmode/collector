@@ -4,13 +4,13 @@ uselessItems.forEach(item => {delete itemData.data[item]})
 
 export default createStore({
    state: {
-      patch: '12.9.1',
+      patch: '12.10.1',
       champions: championData.data,
       items: itemData.data,
       mythics: ["6693", "6692", "6691", "6673", "6672", "6671", "6664", "6662", "6656", "6655", "6653", "6632", "6631", "6630", "6617", "6616", "4644", "4636", "4633", "4005", "3190", "3152", "3078", "3068", "3001", "2065"],
       armorPenItems: [
-         {id: "3035", percentage: 0.2, lethality: 0}, // last whisper
-         {id: "3036", percentage: 0.35, lethality: 0},// lord dominik's regards
+         {id: "3035", percentage: 0.18, lethality: 0}, // last whisper
+         {id: "3036", percentage: 0.3, lethality: 0},// lord dominik's regards
          {id: "3042", percentage: 0, lethality: 0},   // muramana
          {id: "3134", percentage: 0, lethality: 10},  // serrated dirk
          {id: "3142", percentage: 0, lethality: 18},  // youmuu's ghostblade
@@ -26,9 +26,9 @@ export default createStore({
       ],
       magicPenItems: [
          {id: "3020", percentage: 0, flat: 18},  // sorcerer's shoes
-         {id: "3135", percentage: 0.45, flat: 0},  // void staff
+         {id: "3135", percentage: 0.4, flat: 0},  // void staff
          {id: "3152", percentage: 0, flat: 6},  // hextech rocketbelt
-         {id: "4630", percentage: 0.15, flat: 0},  // blighting jewel
+         {id: "4630", percentage: 0.13, flat: 0},  // blighting jewel
          {id: "6655", percentage: 0, flat: 6},  // luden's tempest
       ],
       passives: [
