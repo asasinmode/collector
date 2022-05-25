@@ -1,6 +1,8 @@
 import { createStore } from 'vuex'; import * as championData from '@/assets/champion.json'; import * as itemData from '@/assets/item.json'
-const uselessItems = [1035, 1039, 1040, 2003, 2010, 2031, 2033, 2052, 2055, 2138, 2139, 2140, 2403, 2419, 2420, 2421, 2423, 2424, 3513, 3599, 3600, 4403, 3330, 3340, 3363, 3364, 3400]
+const uselessItems = [1035, 1039, 1040, 1500, 1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, 1510, 1511, 1512, 1513, 1514, 1515, 1516, 1517, 1518, 1519, 2003, 2010, 2031, 2033, 2052, 2055, 2138, 2139, 2140, 2403, 2419, 2420, 2421, 2423, 2424, 3513, 3599, 3600, 4403, 3330, 3340, 3363, 3364, 3400, 3901, 3902, 3903, 7050]
+const Ornnaments = [7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 7016, 7017, 7018, 7019, 7020, 7021, 7022, 7023, 7024]
 uselessItems.forEach(item => {delete itemData.data[item]})
+Ornnaments.forEach(item => {delete itemData.data[item]})
 
 export default createStore({
    state: {

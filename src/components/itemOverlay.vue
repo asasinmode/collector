@@ -40,7 +40,7 @@ export default {
       },
       selectItem(itemName, isForMe){
          let tempCopy = [...this.selectedItems(isForMe)]
-         // console.log(itemName)
+         console.log(itemName)
          if(tempCopy.includes(itemName)){
             tempCopy = tempCopy.filter(item => item != itemName)
          } else{

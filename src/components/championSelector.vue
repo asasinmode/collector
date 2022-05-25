@@ -56,7 +56,7 @@
             <p class="fakeList"><b>Kraken Slayer's</b> <i>Bring It Down</i> passive that deals (60 + 45% bonus attack damage) true damage every third basic attack. Don't see a point in including it.</p><br/>
             <h3 class="centered">what isn't accounted for</h3>
             <p><strong>Any health-dependant</strong> effects, for example <i>Kai'Sa's</i> passive or <i>Blade of the Ruined King's</i> passives aren't included in calculations with the exception being <b>Lord Dominik's Regards</b>.</p><br/>
-            <p><strong>Major runes</strong>, like <i>Conqueror</i>, <i>Coup de Grave</i>, <i>Absolute Focus</i>. Some of them are change with level, some of them scale with main/target champion's hp, most of them are complicated and vary from game to game and don't have a huge, lasting impact on calculations.</p><br/>
+            <p><strong>Major runes</strong>, like <i>Conqueror</i>, <i>Coup de Grave</i>, <i>Absolute Focus</i>. Some of them change with level, some of them scale with main/target champion's hp, most of them are complicated and vary from game to game and don't have a huge, lasting impact on calculations.</p><br/>
             <p>Some <strong>champion innate passives</strong> that didn't strike to me as having a big impact on calculations or they seemed too complicated to implement. If you think they matter, consider visiting the <b>about</b> tab to see where you can contact me.</p>
             <p>List of champion passives <strong>not</strong> accounted for (that I think matter)</p>
                <p class="fakeList">Akshan</p>
