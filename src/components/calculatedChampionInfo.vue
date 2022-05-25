@@ -156,7 +156,6 @@ export default {
                // let aweAbilityPower = ((items.includes("3003") && this.champion.partype === "Mana") ? 0.03 : (items.includes("3003") && this.champion.partype === "Mana") ? 0.05 : 0) * bonusMana
                let aweAbilityPower = 0 // 11.23.1 seraph/archangel changes
                let darkPactAbilityPower = items.includes("4637") ? ((bonusHealth + aweHealth) * 0.02) : 0   // demonic embrace passive
-               // console.log("demonic embrace ap", darkPactAbilityPower)
                let calculatedAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower + aweAbilityPower + darkPactAbilityPower) * abilityPowerModifier
 
                let miniRuneAbilityPower = (calculatedAbilityPower > 0 && (bonusAttackDamage + (5.4 * whisperAttackDamageModifier)) < (calculatedAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
