@@ -6,7 +6,7 @@ Ornnaments.forEach(item => {delete itemData.data[item]})
 
 export default createStore({
    state: {
-      patch: '12.10.1',
+      patch: '12.11.1',
       champions: championData.data,
       items: itemData.data,
       mythics: ["6693", "6692", "6691", "6673", "6672", "6671", "6664", "6662", "6656", "6655", "6653", "6632", "6631", "6630", "6617", "6616", "4644", "4636", "4633", "4005", "3190", "3152", "3078", "3068", "3001", "2065"],
