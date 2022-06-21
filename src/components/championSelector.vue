@@ -1,7 +1,9 @@
 <template>
    <div class="container centered">
       <button class="button selectButton" @click="openChampionOverlay(true)">select champion</button>
-      <FontAwesomeIcon class="button infoIcon" icon="info-circle" size="xs" @click="showInfoModal = true" />
+      <button class="button infoIcon" @click="showInfoModal = true">
+         <FontAwesomeIcon icon="info-circle" size="2xl" />
+      </button>
       <button class="button selectButton" @click="openChampionOverlay(false)">select target</button>
    </div>
    <div class="modalOverlay" v-show="showInfoModal" @click.self="showInfoModal = !showInfoModal">
@@ -92,7 +94,7 @@
             <div class="infoToggleContainer">
                <h3 class="centered">toggle item groups</h3>
                <div class="infoToggleButtonContainer centered">
-                  <button class="button infoToggleButton" @click="toggle('setItemGroupsCheck')">
+                  <button class="button infoToggleButton" @click="setItemGroupsCheck">
                      <div>on</div>
                      <div>off</div>
                      <div class="infoToggleButtonHighlight" :class="{on: itemGroupsCheck}" />
@@ -103,7 +105,7 @@
             <div class="infoToggleContainer">
                <h3 class="centered">toggle graph settings tooltips</h3>
                <div class="infoToggleButtonContainer centered">
-                  <button class="button infoToggleButton" @click="setShowModeTooltips">
+                  <button class="button infoToggleButton" @click="toggleShowModeTooltips">
                      <div>on</div>
                      <div>off</div>
                      <div class="infoToggleButtonHighlight" :class="{on: showModeTooltips}" />
@@ -115,7 +117,7 @@
             <div class="infoToggleContainer">
                <h3 class="centered">toggle ap/magic penetration/mana visibility</h3>
                <div class="infoToggleButtonContainer centered">
-                  <button class="button infoToggleButton" @click="toggle('setApVisibility')">
+                  <button class="button infoToggleButton" @click="setApVisibility">
                      <div>on</div>
                      <div>off</div>
                      <div class="infoToggleButtonHighlight" :class="{on: apVisibility}" />
@@ -134,16 +136,15 @@
 </template>
 
 <script>
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import championOverlay from '@/components/championOverlay.vue'
-library.add(faInfoCircle)
+import { defineComponent } from "vue";
+import { mapState, mapActions } from "pinia";
+import { useMainStore } from "@/stores";
+import championOverlay from "@/components/championOverlay.vue"
 
-export default {
+export default defineComponent({
    name: "championSelector",
    components: {
-      FontAwesomeIcon, championOverlay
+      championOverlay
    },
    data(){
       return{
@@ -154,35 +155,22 @@ export default {
       }
    },
    methods: {
+      ...mapActions(useMainStore, ["setShowModeTooltips", "setItemGroupsCheck", "setApVisibility", "setMainChampion", "setTargetChampion"]),
       selectChampion(champion, isMain){
-         this.$store.commit(this.ownChampion ? isMain ? 'setMainChampion' : 'setTargetChampion' : isMain ? 'setTargetChampion' : 'setMainChampion', {champion: champion})
+         this[this.ownChampion ? isMain ? 'setMainChampion' : 'setTargetChampion' : isMain ? 'setTargetChampion' : 'setMainChampion']({champion: champion})
       },
       openChampionOverlay(own){
          this.showChampionOverlay = true
          this.ownChampion = own
       },
-      toggle(actionName){
-         this.$store.commit(actionName)
-      },
-      setShowModeTooltips(){
-         this.$store.commit('setShowModeTooltips', !this.showModeTooltips)
+      toggleShowModeTooltips(){
+         this.setShowModeTooltips('setShowModeTooltips', !this.showModeTooltips)
       }
    },
    computed:{
-      itemGroupsCheck(){
-         return this.$store.getters.getItemGroupsCheck
-      },
-      showModeTooltips(){
-         return this.$store.getters.getShowModeTooltips
-      },
-      apVisibility(){
-         return this.$store.getters.getApVisibility
-      },
-      patch(){
-         return this.$store.getters.getPatch
-      },
+      ...mapState(useMainStore, ["itemGroupsCheck", "showModeTooltips", "apVisibility", "patch"])
    }
-}
+})
 </script>
 
 <style scoped>
@@ -201,6 +189,10 @@ export default {
    background: var(--bg1);
    height: 3.6em;
    width: 3.6em;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   padding: 0 !important;
 }
 .modalContainer{
    padding: 0;

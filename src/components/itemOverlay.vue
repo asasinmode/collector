@@ -10,33 +10,41 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+import { mapActions, mapState } from "pinia";
+import { useMainStore } from "@/stores";
+
+export default defineComponent({
    name: 'itemOverlay',
    emits: ['closeMe'],
    props: ['isMain'],
    data(){
       return {
          selected: [],
-         itemGroups: [
-            [...this.$store.getters.getMythics, "3802", "4635", "6029", "6660", "6670"],  // mythics
-            ["1001", "2422", "3006", "3009", "3020", "3047", "3111", "3117", "3158"],  // boots
-            ["3031", "3124", "6677"],  // crit modifiers
-            ["1082", "3041"], // glory
-            ["2051", "3112", "3177", "3184"],   // guardian
-            ["3074", "3077", "3748"],  // hydra
-            ["3850", "3851", "3853", "3854", "3855", "3857", "3858", "3859", "3860", "3862", "3863", "3864"],  // support
-            ["3035", "3036", "6694"],  // last whisper
-            ["3053", "3155", "3156", "6673"],   // lifeline
-            ["3003", "3004", "3040", "3042", "3070", "3119", "3121"], // mana charge
-            ["3139", "3140", "6035"],  // quicksilver
-            ["3135", "4630"]  // void pen
-         ],
+         itemGroups: [],
          textFilter: ""
       }
    },
+   mounted(){
+      this.itemGroups = [
+         [...this.mythics, "3802", "4635", "6029", "6660", "6670"],  // mythics
+         ["1001", "2422", "3006", "3009", "3020", "3047", "3111", "3117", "3158"],  // boots
+         ["3031", "3124", "6677"],  // crit modifiers
+         ["1082", "3041"], // glory
+         ["2051", "3112", "3177", "3184"],   // guardian
+         ["3074", "3077", "3748"],  // hydra
+         ["3850", "3851", "3853", "3854", "3855", "3857", "3858", "3859", "3860", "3862", "3863", "3864"],  // support
+         ["3035", "3036", "6694"],  // last whisper
+         ["3053", "3155", "3156", "6673"],   // lifeline
+         ["3003", "3004", "3040", "3042", "3070", "3119", "3121"], // mana charge
+         ["3139", "3140", "6035"],  // quicksilver
+         ["3135", "4630"]  // void pen
+      ]
+   },
    methods: {
+      ...mapActions(useMainStore, ["setItems"]),
       selectedItems(isMain){
-         return this.$store.getters.getSelectedItems(isMain)
+         return this.getSelectedItems(isMain)
       },
       selectItem(itemName, isForMe){
          let tempCopy = [...this.selectedItems(isForMe)]
@@ -60,18 +68,13 @@ export default {
                tempCopy.shift()
             }
          }
-         this.$store.commit('setItems', {isMain: isForMe, items: tempCopy})
+         this.setItems({isMain: isForMe, items: tempCopy})
       },
    },
    computed: {
-      patch(){
-         return this.$store.getters.getPatch
-      },
-      items(){
-         return this.$store.getters.getAllItems
-      },
+      ...mapState(useMainStore, ["patch", "mythics", "allItems", "itemGroupsCheck", "getSelectedItems"]),
       sortedItems(){
-         return Object.keys(this.items).map(key => {return {id: key, ...this.items[key]}}).sort((a, b) => a.gold.total - b.gold.total)
+         return Object.keys(this.allItems).map(key => {return {id: key, ...this.allItems[key]}}).sort((a, b) => a.gold.total - b.gold.total)
       },
       filteredItems(){
          return this.textFilter != "" ? this.sortedItems.filter(item => {
@@ -83,12 +86,9 @@ export default {
             return rv
          }
          ) : this.sortedItems
-      },
-      itemGroupsCheck(){
-         return this.$store.getters.getItemGroupsCheck
       }
    }
-}
+})
 </script>
 
 <style scoped>
@@ -103,6 +103,7 @@ img{
    width: calc((100% / 6) - 0.2em);
    height: auto;
    margin: 0.1em;
+   margin-block: 0;
    padding-bottom: 0;
    border-radius: 4px;
    filter:brightness(0.6);

@@ -10,7 +10,11 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+import { mapState } from "pinia";
+import { useMainStore } from "@/stores";
+
+export default defineComponent({
    name: "championOverlay",
    emits: ['closeMe', 'selectChampion'],
    data(){
@@ -24,20 +28,15 @@ export default {
       }
    },
    computed: {
-      patch(){
-         return this.$store.getters.getPatch
-      },
-      champions(){
-         return this.$store.getters.getAllChampions
-      },
+      ...mapState(useMainStore, ["patch", "champions", "getMainChampion", "getTargetChampion"]),
       sortedChampions(){
          return Object.keys(this.champions).map(key => {return {key: key, ...this.champions[key]}}).sort((a, b) => a.name > b.name ? 1 : -1)
       },
       main(){
-         return this.$store.getters.getMainChampion
+         return this.getMainChampion
       },
       target(){
-         return this.$store.getters.getTargetChampion
+         return this.getTargetChampion
       },
       filteredChampions(){
          return this.textFilter != "" ? this.sortedChampions.filter(champion => {
@@ -50,7 +49,7 @@ export default {
          }) : this.sortedChampions
       }
    }
-}
+})
 </script>
 
 <style scoped>
@@ -65,10 +64,10 @@ export default {
 img{
    cursor: pointer;
    display: inline-block;
-   width: calc((100% / 6) - 0.1em);
+   width: calc((100% / 6));
    height: auto;
-   margin: 0.05em;
    padding-bottom: 0;
+   margin-top: -0.25em;
    border-radius: 4px;
    filter:brightness(0.6);
 }
@@ -99,7 +98,7 @@ img.main.target{
 }
 @media (min-width: 768px) {
    img{
-      width: calc((100% / 8) - 0.1em);
+      width: calc((100% / 8));
    }
    .modalContainer{
       width: 40em;

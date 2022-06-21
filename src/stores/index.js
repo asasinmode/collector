@@ -1,14 +1,15 @@
-import { createStore } from 'vuex'; import * as championData from '@/assets/champion.json'; import * as itemData from '@/assets/item.json'
+import { defineStore } from 'pinia'; import * as championData from '@/assets/champion.json'; import * as itemData from '@/assets/item.json'
 const uselessItems = [1035, 1039, 1040, 1500, 1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, 1510, 1511, 1512, 1513, 1514, 1515, 1516, 1517, 1518, 1519, 2003, 2010, 2031, 2033, 2052, 2055, 2138, 2139, 2140, 2403, 2419, 2420, 2421, 2423, 2424, 3330, 3340, 3363, 3364, 3400, 3513, 3599, 3600, 3901, 3902, 3903, 4403, 4638, 4643, 7050]
 const Ornnaments = [7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 7016, 7017, 7018, 7019, 7020, 7021, 7022, 7023, 7024]
 uselessItems.forEach(id => {delete itemData.data[id]})
 Ornnaments.forEach(id => {delete itemData.data[id]})
 
-export default createStore({
-   state: {
+export const useMainStore = defineStore({
+   id: 'counter',
+   state: () => ({
       patch: '12.11.1',
       champions: championData.data,
-      items: itemData.data,
+      allItems: itemData.data,
       mythics: ["6693", "6692", "6691", "6673", "6672", "6671", "6664", "6662", "6656", "6655", "6653", "6632", "6631", "6630", "6617", "6616", "4644", "4636", "4633", "4005", "3190", "3152", "3078", "3068", "3001", "2065"],
       adaptiveForceBias: {
          attackDamage: ["Aatrox", "Akshan", "Aphelios", "Ashe", "Belveth", "Blitzcrank", "Braum", "Caitlyn", "Camille", "Corki", "Darius", "Draven", "DrMundo", "Ezreal", "Fiora", "Gangplank", "Garen", "Gnar", "Graves", "Hecarim", "Illaoi", "Irelia", "JarvanIV", "Jax", "Jayce", "Jhin", "Jinx", "Kaisa", "Kalista", "Kayle", "Kayn", "Khazix", "Kindred", "Kled", "KogMaw", "LeeSin", "Leona", "Lucian", "MasterYi", "MissFortune", "MonkeyKing", "Nasus", "Nocturne", "Olaf", "Ornn", "Pantheon", "Poppy", "Pyke", "Qiyana", "Quinn", "Rammus", "RekSai", "Rell", "Renekton", "Rengar", "Riven", "Samira", "Senna", "Sett", "Shaco", "Shen", "Shyvana", "Sion", "Sivir", "Skarner", "TahmKench", "Talon", "Taric", "Thresh", "Tristana", "Trundle", "Tryndamere", "Twitch", "Udyr", "Urgot", "Varus", "Vayne", "Vi", "Viego", "Volibear", "Warwick", "Xayah", "XinZhao", "Yasuo", "Yone", "Yorick", "Zed", "Zeri"],
@@ -117,68 +118,9 @@ export default createStore({
       },
       showModeTooltips: true,
       itemGroupsCheck: true,
-      apVisibility: false,
-   },
-   mutations: {
-      setMainChampion(state, payload){
-         state.mainChampion = payload.champion
-      },
-      setTargetChampion(state, payload){
-         state.targetChampion = payload.champion
-      },
-      setItems(state, payload){
-         if(payload.isMain){
-            state.mainItems = payload.items
-         } else{
-            state.targetItems = payload.items
-         }
-      },
-      setLevel(state, payload){
-         if(payload.isMain){
-            state.mainLevel = payload.level
-         } else{
-            state.targetLevel = payload.level
-         }
-      },
-      setCalculatedStats(state, payload){
-         if(payload.isMain){
-            state.championStats.main = payload.stats
-         } else{
-            state.championStats.target = payload.stats
-         }
-      },
-      setShowModeTooltips(state, payload){
-         localStorage.setItem('tooltipsVisibility', payload)
-         state.showModeTooltips = (payload == 'false' || payload == false) ? false : true
-      },
-      setItemGroupsCheck(state){
-         state.itemGroupsCheck = !state.itemGroupsCheck
-      },
-      setApVisibility(state){
-         state.apVisibility = !state.apVisibility
-      }
-   },
-   actions: {
-   },
+      apVisibility: false
+   }),
    getters: {
-      getPatch(state){
-         return state.patch
-      },
-      getAllChampions(state){
-         return state.champions
-      },
-      getAllItems(state){
-         return state.items
-      },
-      getMythics(state){
-         return state.mythics
-      },
-      getAdaptiveForceBias(state){
-         return state.adaptiveForceBias
-      },
-      getArmorPenItems(state){
-         return state.armorPenItems
-      },
       filterArmorPenItems: (state) => (items) => {
          return state.armorPenItems.filter(item => items.includes(item.id))
       },
@@ -188,14 +130,11 @@ export default createStore({
       getChampion: (state) => (champion) => {
          return state.champions[champion]
       },
-      getASRatioChampions(state){
-         return state.asRatioChampions
+      getMainChampion(){
+         return this.champions[this.mainChampion]
       },
-      getMainChampion(state){
-         return state.champions[state.mainChampion]
-      },
-      getTargetChampion(state){
-         return state.champions[state.targetChampion]
+      getTargetChampion(){
+         return this.champions[this.targetChampion]
       },
       getSelectedItems: (state) => (isMain) => {
          return isMain ? state.mainItems : state.targetItems
@@ -204,22 +143,49 @@ export default createStore({
          return isMain ? state.mainLevel : state.targetLevel
       },
       getItem: (state) => (item) => {
-         return state.items[item]
-      },
-      getPassives(state){
-         return state.passives
+         return state.allItems[item]
       },
       getCalculatedStats: (state) => (isMain) => {
          return isMain ? state.championStats.main : state.championStats.target
+      }
+   },
+   actions: {
+      setMainChampion(payload){
+         this.mainChampion = payload.champion
       },
-      getShowModeTooltips(state){
-         return state.showModeTooltips
+      setTargetChampion(payload){
+         this.targetChampion = payload.champion
       },
-      getItemGroupsCheck(state){
-         return state.itemGroupsCheck
+      setItems(payload){
+         if(payload.isMain){
+            this.mainItems = payload.items
+         } else{
+            this.targetItems = payload.items
+         }
       },
-      getApVisibility(state){
-         return state.apVisibility
+      setLevel(payload){
+         if(payload.isMain){
+            this.mainLevel = payload.level
+         } else{
+            this.targetLevel = payload.level
+         }
+      },
+      setCalculatedStats(payload){
+         if(payload.isMain){
+            this.championStats.main = payload.stats
+         } else{
+            this.championStats.target = payload.stats
+         }
+      },
+      setShowModeTooltips(payload){
+         localStorage.setItem('tooltipsVisibility', payload)
+         this.showModeTooltips = (payload == 'false' || payload == false) ? false : true
+      },
+      setItemGroupsCheck(){
+         this.itemGroupsCheck = !this.itemGroupsCheck
+      },
+      setApVisibility(){
+         this.apVisibility = !this.apVisibility
       }
    }
 })

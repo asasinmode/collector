@@ -7,25 +7,33 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
+import { mapActions, mapState } from "pinia";
+import { useMainStore } from "@/stores";
 import championSelector from "@/components/championSelector.vue"; import championComparison from '@/components/championComparison.vue'; import results from '@/components/results.vue'
-export default {
+
+export default defineComponent({
    name: 'App',
    components: {
       championSelector, championComparison, results
    },
    mounted(){
       if(localStorage.getItem('tooltipsVisibility') != "null"){
-         this.$store.commit('setShowModeTooltips', localStorage.getItem('tooltipsVisibility'))
+         this.setShowModeTooltips(localStorage.getItem('tooltipsVisibility'))
       } else{
-         localStorage.setItem('tooltipsVisibility', this.$store.getters.getShowModeTooltips)
+         localStorage.setItem('tooltipsVisibility', this.showModeTooltips)
       }
    },
+   methods: {
+      ...mapActions(useMainStore, ["setShowModeTooltips"])
+   },
    computed: {
+      ...mapState(useMainStore, ["getMainChampion", "getTargetChampion", "getCalculatedStats", "showModeTooltips", "patch"]),
       showResults(){
-         return this.$store.getters.getMainChampion != undefined && this.$store.getters.getTargetChampion != undefined && this.$store.getters.getCalculatedStats(true)[0].stats.attackDamage != undefined && this.$store.getters.getCalculatedStats(false).armor != undefined
+         return this.getMainChampion != undefined && this.getTargetChampion != undefined && this.getCalculatedStats(true)[0].stats.attackDamage != undefined && this.getCalculatedStats(false).armor != undefined
       }
    }
-}
+})
 </script>
 
 <style>

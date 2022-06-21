@@ -3,7 +3,7 @@
    <h3>calculated stats</h3>
    <div class="baseStats centered">
       <div class="baseStatContainer centered" v-for="(stat, name) in filteredStats" :title="tooltipTitles[name] ? tooltipTitles[name] : ''" :key="stat.id">
-         <label :class="{tooltipAvailable: tooltipTitles[name]}"><img :src="require(`@/assets/statIcons/${name}.webp`)">{{name}}</label>
+         <label :class="{tooltipAvailable: tooltipTitles[name]}"><img :src="iconURL(name)">{{name}}</label>
          <div class="baseStat">
             {{stat}}
          </div>
@@ -13,7 +13,11 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+import { mapState, mapActions } from "pinia";
+import { useMainStore } from "@/stores";
+
+export default defineComponent({
    name: 'calculatedChampionInfo',
    props: ['isMain'],
    data(){
@@ -22,24 +26,25 @@ export default {
       }
    },
    methods: {
+      ...mapActions(useMainStore, ["setCalculatedStats"]),
       sumValuesOf(array, statKey){
-         array = array.map(item => this.$store.getters.getItem(item))
+         array = array.map(item => this.getItem(item))
          return array.length ? array.map(element => element.stats[statKey] ? element.stats[statKey] : 0).reduce((previous, next) => previous + next) : 0
       },
       calculateArmorPen(array){
          const itemsLethality = array.length > 0 ? array.map(item => item.lethality).reduce((previous, next) => previous + next) : 0
          const itemsArmorPen = array.length > 0 ? Math.floor(array.map(item => item.percentage).reduce((previous, next) => previous + next) * 100) : 0
          return [
-            itemsLethality + (this.legendaries(true).length * (this.$store.getters.getSelectedItems(true).includes("6693") ? 5 : 0)),
-            itemsArmorPen + (this.legendaries(true).length * (this.$store.getters.getSelectedItems(true).includes("6692") ? 4 : 0)) + (this.legendaries(true).length * (this.$store.getters.getSelectedItems(true).includes("6632") ? 5 : 0))
+            itemsLethality + (this.legendaries(true).length * (this.getSelectedItems(true).includes("6693") ? 5 : 0)),
+            itemsArmorPen + (this.legendaries(true).length * (this.getSelectedItems(true).includes("6692") ? 4 : 0)) + (this.legendaries(true).length * (this.getSelectedItems(true).includes("6632") ? 5 : 0))
          ]
       },
       calculateMagicPen(array){
          const itemsFlat = array.length > 0 ? array.map(item => item.flat).reduce((previous, next) => previous + next) : 0
          const itemsPercentage = array.length > 0 ? Math.floor(array.map(item => item.percentage).reduce((previous, next) => previous + next) * 100) : 0
          return [
-            itemsFlat + (this.legendaries(true).length * ((this.$store.getters.getSelectedItems(true).includes("3152") || this.$store.getters.getSelectedItems(true).includes("6655")) ? 5 : 0)),
-            itemsPercentage + (this.legendaries(true).length * (this.$store.getters.getSelectedItems(true).includes("6632") ? 5 : 0))
+            itemsFlat + (this.legendaries(true).length * ((this.getSelectedItems(true).includes("3152") || this.getSelectedItems(true).includes("6655")) ? 5 : 0)),
+            itemsPercentage + (this.legendaries(true).length * (this.getSelectedItems(true).includes("6632") ? 5 : 0))
          ]
       },
       calculateStat(base, level, growth){
@@ -57,7 +62,7 @@ export default {
          return damage * (this.champion.id === "Jhin" ? 0.86 : 1) * ((this.champion.id === "Yasuo" || this.champion.id === "Yone") ? 0.9 : 1)   // jhin, yasuo/yone
       },
       legendaries(isMain){
-         return this.$store.getters.getSelectedItems(isMain).filter(item => (!this.mythics.includes(item) && this.$store.getters.getItem(item).gold.total >= 1600) || item === "3112" || item === "2051" || item === "3184" || item === "3177")
+         return this.getSelectedItems(isMain).filter(item => (!this.mythics.includes(item) && this.getItem(item).gold.total >= 1600) || item === "3112" || item === "2051" || item === "3184" || item === "3177")
       },
       miniRuneAdaptiveForce(championId, bonusAttackDamage, bonusAbilityPower){
          if(bonusAttackDamage === bonusAbilityPower){
@@ -84,13 +89,13 @@ export default {
          const itemsHealth = this.sumValuesOf(items, "FlatHPPoolMod") + mythicPassiveHealth
          const itemsMana = this.champion.partype === "Mana" ? this.sumValuesOf(items, "FlatMPPoolMod") : 0
 
-         const [finalLethality, finalPercentPhysicalPenetration] = this.calculateArmorPen(this.$store.getters.filterArmorPenItems(items))
-         const [finalFlatMagicPenetration, finalPercentMagicalPenetration] = this.calculateMagicPen(this.$store.getters.filterMagicPenItems(items))
+         const [finalLethality, finalPercentPhysicalPenetration] = this.calculateArmorPen(this.filterArmorPenItems(items))
+         const [finalFlatMagicPenetration, finalPercentMagicalPenetration] = this.calculateMagicPen(this.filterMagicPenItems(items))
          const finalCritChance = this.critChance(items)[0]
          const finalCritDamage = this.critDamage(items)
 
          const itemsAttackSpeed = this.sumValuesOf(items, "PercentAttackSpeedMod") + this.legendaries(true).length * (items.includes("6672") ? 0.1 : 0)  // all items + kraken slayer mythic passive
-         const attackSpeedRatio = (this.$store.getters.getASRatioChampions.find(champion => champion[0] == this.champion.id) ? this.$store.getters.getASRatioChampions.find(champion => champion[0] == this.champion.id)[1] : 1)
+         const attackSpeedRatio = (this.asRatioChampions.find(champion => champion[0] == this.champion.id) ? this.asRatioChampions.find(champion => champion[0] == this.champion.id)[1] : 1)
          const finalAttackSpeedArray = this.champion.id === "Jhin" ? Array.from({length: 18}, (_, level) => {return parseFloat((((3 / 100) * level * (0.7025 + (0.0175 * level)) + 1) * this.champion.stats.attackspeed).toFixed(3))}) // jhin is a special cookie
             : Array.from({length: 18}, (_, level) => {
                let attackSpeedFromLevel = (this.champion.stats.attackspeedperlevel / 100) * (level) * (0.7025 + (0.0175 * (level)))
@@ -220,29 +225,21 @@ export default {
          calculated.magicPenetration = [finalFlatMagicPenetration, finalPercentMagicalPenetration]
 
          return calculated
+      },
+      iconURL(icon){
+         return new URL(`../assets/statIcons/${icon}.webp`, import.meta.url).href
       }
    },
    computed:{
+      ...mapState(useMainStore, ["getSelectedItems", "allItems", "mythics", "adaptiveForceBias", "armorPenItems", "getLevel", "getMainChampion", "getTargetChampion", "apVisibility", "getItem", "getSelectedItems", "filterArmorPenItems", "filterMagicPenItems", "asRatioChampions"]),
       selectedItems(){
-         return this.$store.getters.getSelectedItems(this.isMain)
-      },
-      allItems(){
-         return this.$store.getters.getAllItems
-      },
-      mythics(){
-         return this.$store.getters.getMythics
-      },
-      adaptiveForceBias(){
-         return this.$store.getters.getAdaptiveForceBias
-      },
-      armorPenItems(){
-         return this.$store.getters.getArmorPenItems
+         return this.getSelectedItems(this.isMain)
       },
       level(){
-         return this.$store.getters.getLevel(this.isMain)
+         return this.getLevel(this.isMain)
       },
       champion(){
-         return this.isMain ? this.$store.getters.getMainChampion : this.$store.getters.getTargetChampion
+         return this.isMain ? this.getMainChampion : this.getTargetChampion
       },
       baseStats(){
          let calculated = {...this.calculateStats(this.selectedItems)}
@@ -253,12 +250,12 @@ export default {
                : undefined
             if(secondItemset != undefined){
                secondItemset.push(this.selectedItems.includes("3036") ? "6676" : "3036")
-               this.$store.commit('setCalculatedStats', {stats: [{stats: {...calculated}, items: this.selectedItems, title: this.selectedItems.includes("3036") ? "ldr" : "collector"}, {stats: {...this.calculateStats(secondItemset)}, items: secondItemset, title: this.selectedItems.includes("3036") ? "collector" : "ldr"}], isMain: this.isMain})
+               this.setCalculatedStats({stats: [{stats: {...calculated}, items: this.selectedItems, title: this.selectedItems.includes("3036") ? "ldr" : "collector"}, {stats: {...this.calculateStats(secondItemset)}, items: secondItemset, title: this.selectedItems.includes("3036") ? "collector" : "ldr"}], isMain: this.isMain})
             } else{
-               this.$store.commit('setCalculatedStats', {stats: [{stats: {...calculated}, items: this.selectedItems, title: "damage"}], isMain: this.isMain})
+               this.setCalculatedStats({stats: [{stats: {...calculated}, items: this.selectedItems, title: "damage"}], isMain: this.isMain})
             }
          } else{
-            this.$store.commit('setCalculatedStats', {stats: {...calculated}, isMain: this.isMain})
+            this.setCalculatedStats({stats: {...calculated}, isMain: this.isMain})
          }
          
          if(this.isMain){
@@ -307,12 +304,9 @@ export default {
          return Object.keys(this.baseStats).filter(key => {
                return this.baseStats[key] != undefined
          }).reduce((obj, key) => {return {...obj, [key]: this.baseStats[key]}}, {})
-      },
-      apVisibility(){
-         return this.$store.getters.getApVisibility
       }
    }
-}
+})
 </script>
 
 <style scoped>

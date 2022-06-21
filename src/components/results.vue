@@ -26,12 +26,15 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
+import { mapState } from "pinia";
+import { useMainStore } from "@/stores";
 import Chart from 'chart.js/auto';
 Chart.defaults.elements.point.hoverRadius = 5;
 const chartGridLineColor = 'hsla(0, 0%, 100%, 0.1)';
 const chartGridTextColor = 'hsla(0, 0%, 100%, 0.6)';
 
-export default {
+export default defineComponent({
    name: 'results',
    data(){
       return {
@@ -154,22 +157,22 @@ export default {
          }
       },
       selectedItems(isMain){
-         return this.$store.getters.getSelectedItems(isMain)
+         return this.getSelectedItems(isMain)
       },
       legendaries(isMain){
-         return this.$store.getters.getSelectedItems(isMain).filter(item => (!this.mythics.includes(item) && this.$store.getters.getItem(item).gold.total >= 1600) || item === "3112" || item === "2051" || item === "3184" || item === "3177")
+         return this.getSelectedItems(isMain).filter(item => (!this.mythics.includes(item) && this.getItem(item).gold.total >= 1600) || item === "3112" || item === "2051" || item === "3184" || item === "3177")
       },
       calculateStat(base, level, growth){
          return base + (growth * (level - 1) * (0.7025 + (0.0175 * (level - 1))))
       },
       champion(isMain){
-         return isMain ? this.$store.getters.getMainChampion : this.$store.getters.getTargetChampion
+         return isMain ? this.getMainChampion : this.getTargetChampion
       },
       isRanged(isMain){
          return this.champion(isMain).stats.attackrange >= 300
       },
       level(isMain){
-         return this.$store.getters.getLevel(isMain)
+         return this.getLevel(isMain)
       },
       onHitDamage(stats, level, items){ // [physical, magic]
          const onHitGuinsoo = Math.floor(stats.criticalStrike[0] / 5) * (items.includes("3124") ? 40 : items.includes("6677") ? 35 : 0) / 4
@@ -185,17 +188,12 @@ export default {
       },
    },
    computed:{
-      showModeTooltips(){  
-         return this.$store.getters.getShowModeTooltips
-      },
+      ...mapState(useMainStore, ["showModeTooltips", "getCalculatedStats", "mythics", "getMainChampion", "getTargetChampion", "getSelectedItems", "getItem", "getLevel"]),
       mainStats(){
-         return this.$store.getters.getCalculatedStats(true)
+         return this.getCalculatedStats(true)
       },
       targetStats(){
-         return this.$store.getters.getCalculatedStats(false)
-      },
-      mythics(){
-         return this.$store.getters.getMythics
+         return this.getCalculatedStats(false)
       },
       damageEqual(){ // damage at equal levels
          return this.mainStats.map(infoSet => {
@@ -240,7 +238,7 @@ export default {
          deep: true
       }
    }
-}
+})
 </script>
 
 <style scoped>

@@ -26,8 +26,12 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
+import { mapState } from "pinia";
+import { useMainStore } from "@/stores";
+
 import baseChampionInfo from '@/components/baseChampionInfo.vue'; import championILSelector from '@/components/championILSelector.vue'; import calculatedChampionInfo from '@/components/calculatedChampionInfo.vue'
-export default {
+export default defineComponent({
    name: 'championComparison',
    components: {
       baseChampionInfo, championILSelector, calculatedChampionInfo
@@ -39,33 +43,28 @@ export default {
    },
    methods:{
       item(name){
-         return this.$store.getters.getItem(name)
+         return this.getItem(name)
       },
       passive(item){
          return this.passives.find(passive => passive.id === item)
       },
    },
    computed:{
-      patch(){
-         return this.$store.getters.getPatch
-      },
+      ...mapState(useMainStore, ["patch", "getMainChampion", "getTargetChampion", "getSelectedItems", "passives", "getItem"]),
       main(){
-         return this.$store.getters.getMainChampion
+         return this.getMainChampion
       },
       target(){
-         return this.$store.getters.getTargetChampion
+         return this.getTargetChampion
       },
       mainItems(){
-         return this.$store.getters.getSelectedItems(true)
+         return this.getSelectedItems(true)
       },
       targetItems(){
-         return this.$store.getters.getSelectedItems(false)
-      },
-      passives(){
-         return this.$store.getters.getPassives
+         return this.getSelectedItems(false)
       }
    }
-}
+})
 </script>
 
 <style scoped>

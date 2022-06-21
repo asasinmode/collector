@@ -8,7 +8,7 @@
          <h3>base stats</h3>
          <section class="baseStats">
             <div class="baseStatContainer centered" v-for="(stat, name) in filteredStats" :key="stat.id">
-               <label><img :src="require(`@/assets/statIcons/${name}.webp`)">{{name}}</label>
+               <label><img :src="iconURL(name)">{{name}}</label>
                <div class="baseStat">
                   {{stat.value}} (+{{stat.growth}})
                </div>
@@ -19,12 +19,22 @@
 </template>
 
 <script>
-export default {
+import { mapState } from "pinia";
+import { useMainStore } from "@/stores";
+import { defineComponent } from "vue";
+
+export default defineComponent({
    name: 'baseChampionInfo',
    props: ['target', 'isMain'],
+   methods: {
+      iconURL(icon){
+         return new URL(`../assets/statIcons/${icon}.webp`, import.meta.url).href
+      }
+   },
    computed:{
+      ...mapState(useMainStore, ["getChampion"]),
       champion(){
-         return this.$store.getters.getChampion(this.target)
+         return this.getChampion(this.target)
       },
       baseStats(){
          return {
@@ -56,7 +66,7 @@ export default {
          }).reduce((obj, key) => {return {...obj, [key]: this.baseStats[key]}}, {})
       }
    }
-}
+})
 </script>
 
 <style scoped>

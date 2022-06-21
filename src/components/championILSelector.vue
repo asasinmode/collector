@@ -5,7 +5,7 @@
       </div>
       <div class="ilButtonContainer levelSelect">
          <label for="levelSelect" >level</label>
-         <select id="levelSelect" ref="levelSelect" @change="setLevel">
+         <select id="levelSelect" ref="levelSelect" @change="changeLevel">
             <option v-for="i in 18" :value="i" :key="`levelOption${i}`">{{i}}</option>
          </select>
       </div>
@@ -14,8 +14,12 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
+import { mapActions } from "pinia";
+import { useMainStore } from "@/stores";
 import itemOverlay from '@/components/itemOverlay.vue'
-export default {
+
+export default defineComponent({
    name: 'championILSelector',
    props: ['isMain'],
    components: {
@@ -28,11 +32,12 @@ export default {
       }
    },
    methods: {
-      setLevel(){
-         this.$store.commit('setLevel', {isMain: this.isMain, level: parseInt(this.$refs.levelSelect.value)})
+      ...mapActions(useMainStore, ["setLevel"]),
+      changeLevel(){
+         this.setLevel({isMain: this.isMain, level: parseInt(this.$refs.levelSelect.value)})
       }
    }
-}
+})
 </script>
 
 <style scoped>
