@@ -59,6 +59,12 @@ export default {
       legendaries(isMain){
          return this.$store.getters.getSelectedItems(isMain).filter(item => (!this.mythics.includes(item) && this.$store.getters.getItem(item).gold.total >= 1600) || item === "3112" || item === "2051" || item === "3184" || item === "3177")
       },
+      miniRuneAdaptiveForce(championId, bonusAttackDamage, bonusAbilityPower){
+         if(bonusAttackDamage === bonusAbilityPower){
+            return this.adaptiveForceBias.attackDamage.includes(championId) ? {attackDamage: 5.4, abilityPower: 0} : {attackDamage: 0, abilityPower: 9}
+         }
+         return bonusAttackDamage > bonusAbilityPower ? {attackDamage: 5.4, abilityPower: 0} : {attackDamage: 0, abilityPower: 9}
+      },
       calculateStats(items){
          const calculated = {
             attackDamage: undefined,
@@ -68,131 +74,151 @@ export default {
             magicPenetration: undefined,
             criticalStrike: undefined,
             health: undefined,
+            mana: undefined,
             armor: undefined,
             magicResists: undefined
          }
          const miniRuneAttackSpeed = 0.1, miniRuneArmor = 6
 
-         let itemsHealth = this.sumValuesOf(items, "FlatHPPoolMod")
-         let mythicPassiveHealth = this.legendaries(this.isMain).length * (items.includes("6662") ? 100 : 0) + this.legendaries(this.isMain).length * ((items.includes("6664") || items.includes("3068")) ? 50 : items.includes("6673") ? 70 : 0)  // frostfire gauntlet / sunfire aegis and turbochemtank / immortal shieldbow mythic passives
-         let bonusMana = this.sumValuesOf(items, "FlatMPPoolMod")
-         let bonusHealth = itemsHealth + mythicPassiveHealth
+         const mythicPassiveHealth = this.legendaries(this.isMain).length * (items.includes("6662") ? 100 : 0) + this.legendaries(this.isMain).length * ((items.includes("6664") || items.includes("3068")) ? 50 : items.includes("6673") ? 70 : 0)  // frostfire gauntlet / sunfire aegis and turbochemtank / immortal shieldbow mythic passives
+         const itemsHealth = this.sumValuesOf(items, "FlatHPPoolMod") + mythicPassiveHealth
+         const itemsMana = this.champion.partype === "Mana" ? this.sumValuesOf(items, "FlatMPPoolMod") : 0
 
-         if(this.champion.id === "Vladimir"){   // i love vladimir
-            let itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod")
-            let mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from everfrost/imperial mandate/riftmaker mythic passive
-            let dreadAbilityPower = items.includes("3041") ? 125 : 0
-            let crimsonPactBonusAbilityPower = bonusHealth / 30
-            let abilityPowerModifier = 1 + (items.includes("3089") ? 0.35 : 0)
-            let bonusAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower) * abilityPowerModifier
+         const [finalLethality, finalPercentPhysicalPenetration] = this.calculateArmorPen(this.$store.getters.filterArmorPenItems(items))
+         const [finalFlatMagicPenetration, finalPercentMagicalPenetration] = this.calculateMagicPen(this.$store.getters.filterMagicPenItems(items))
+         const finalCritChance = this.critChance(items)[0]
+         const finalCritDamage = this.critDamage(items)
 
-            let itemsAttackDamage = this.sumValuesOf(items, "FlatPhysicalDamageMod")
-            let mythicPassiveAttackDamage = this.legendaries(this.isMain).length * (items.includes("6673") ? 5 : 0) + this.legendaries(this.isMain).length * (items.includes("3078") ? 3 : 0) // ad from shieldbow/trinity mythic passive
-            let titanicAttackDamage = items.includes("3748") ? (itemsHealth + mythicPassiveHealth) * 0.02 : 0 // ad from titanic hydra passive
-            let bonusAttackDamage = itemsAttackDamage + mythicPassiveAttackDamage + titanicAttackDamage  // needed for adaptive force calculation
+         const itemsAttackSpeed = this.sumValuesOf(items, "PercentAttackSpeedMod") + this.legendaries(true).length * (items.includes("6672") ? 0.1 : 0)  // all items + kraken slayer mythic passive
+         const attackSpeedRatio = (this.$store.getters.getASRatioChampions.find(champion => champion[0] == this.champion.id) ? this.$store.getters.getASRatioChampions.find(champion => champion[0] == this.champion.id)[1] : 1)
+         const finalAttackSpeedArray = this.champion.id === "Jhin" ? Array.from({length: 18}, (_, level) => {return parseFloat((((3 / 100) * level * (0.7025 + (0.0175 * level)) + 1) * this.champion.stats.attackspeed).toFixed(3))}) // jhin is a special cookie
+            : Array.from({length: 18}, (_, level) => {
+               let attackSpeedFromLevel = (this.champion.stats.attackspeedperlevel / 100) * (level) * (0.7025 + (0.0175 * (level)))
+               return parseFloat((this.champion.stats.attackspeed * ((attackSpeedFromLevel + itemsAttackSpeed + miniRuneAttackSpeed) * attackSpeedRatio + 1)).toFixed(3))
+            }).map(attackSpeed => (attackSpeed > 2.5 && this.champion.id !== "Belveth") ? 2.5 : attackSpeed)
+         
+         const mythicPassiveAttackDamage = this.legendaries(true).length * (items.includes("6673") ? 5 : 0) + this.legendaries(true).length * (items.includes("3078") ? 3 : 0) // ad from shieldbow/trinity mythic passive
+         const itemsAttackDamage = this.sumValuesOf(items, "FlatPhysicalDamageMod") + mythicPassiveAttackDamage
+         
+         const dreadAbilityPower = items.includes("3041") ? 125 : 0
+         const mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from imperial mandate/everfrost/riftmaker mythic passive
+         const itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod") + mythicPassiveAbilityPower + dreadAbilityPower
 
-            let miniRuneAbilityPower = (bonusAbilityPower > 0 && (bonusAttackDamage + 5.4) < (bonusAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
+         const mythicPassiveArmor = this.legendaries(false).length * (items.includes("3001") ? 5 : 0)
+         const itemsArmor = this.sumValuesOf(items, "FlatArmorMod") + mythicPassiveArmor
+         const mythicPassiveMagicResists = this.legendaries(false).length * (items.includes("3001") ? 5 : 0)
+         const itemsMagicResists = this.sumValuesOf(items, "FlatSpellBlockMod") + mythicPassiveMagicResists
 
-            bonusAbilityPower += miniRuneAbilityPower * abilityPowerModifier
+         const itemPassiveRabadon = items.includes("3089") ? 1.35 : 1
+         
+         const championPassiveWindBrothers = (this.champion.id === "Yasuo" || this.champion.id === "Yone") ? this.critChance(items)[1] * 0.4 : 0   // yone/yasuo passive bonus attack damage
+         const championPassiveVladimirHealthToAPRatio = this.champion.id === "Vladimir" ? (1 / 30) : 0  // vladimir passive health to ability power ratio
+         const championPassiveVladimirAPToHealthRatio = this.champion.id === "Vladimir" ? 1.6 : 0  // vladimir passive ability power to health ratio
+         const championPassiveVladimirBonusHealthToApRatio = (this.champion.id === "Vladimir" && items.includes("3089")) ? 0.0188 : 0   // slightly higher number from https://leagueoflegends.fandom.com/wiki/Vladimir/LoL#Details_
 
-            var crimsonPactBonusHealth = ((bonusAbilityPower + (dreadAbilityPower * abilityPowerModifier)) - Math.floor(crimsonPactBonusAbilityPower)) * 1.6   // for some reason rounding it down works :)
-            let darkPactAbilityPower = items.includes("4637") ? ((bonusHealth + crimsonPactBonusHealth) * 0.02) : 0   // initial demonic embrace
+         const finalHealthArray = [], finalManaArray = [], finalAttackDamageArray = [], finalAbilityPowerArray = [], finalArmorArray = [], finalMagicResistsArray = []
+         for(let level = 1; level <= 18; level++){
+            const levelAttackDamage = this.calculateStat(this.champion.stats.attackdamage, level, this.champion.stats.attackdamageperlevel)
+            const levelHealth = this.calculateStat(this.champion.stats.hp, level, this.champion.stats.hpperlevel)
+            const levelMana = this.champion.partype === "Mana" ? this.calculateStat(this.champion.stats.mp, level, this.champion.stats.mpperlevel) : 0
+            const levelArmor = this.calculateStat(this.champion.stats.armor, level, this.champion.stats.armorperlevel)
+            const levelMagicResists = this.calculateStat(this.champion.stats.spellblock, level, this.champion.stats.spellblockperlevel)
 
-            let crimsonPactBonusHealthBeforeEmbrace = crimsonPactBonusHealth
-            crimsonPactBonusHealth += darkPactAbilityPower * abilityPowerModifier * 1.6
-            let darkPactAbilityPowerBeforeCrimsonPact = darkPactAbilityPower
-            darkPactAbilityPower += items.includes("4637") ? (crimsonPactBonusHealth - crimsonPactBonusHealthBeforeEmbrace) * 0.02 : 0
-            crimsonPactBonusHealth += (darkPactAbilityPower - darkPactAbilityPowerBeforeCrimsonPact) * abilityPowerModifier * 1.6
-         } else {
-            var crimsonPactBonusHealth = 0
-         }
-         bonusHealth += crimsonPactBonusHealth
+            const championPassiveJhin = this.champion.id === "Jhin" ? 1 + (this.jhinPassiveValues[level - 1] + (0.25 * (itemsAttackSpeed + miniRuneAttackSpeed)) + (finalCritChance * (items.includes("3124") ? 0 : 0.003))) : 1   // jhin passive attack damage modifier
+            const championPassiveOrnnModifier = this.champion.id === "Ornn" ? (items.find(item => this.mythics.includes(item)) && level >= 13) ? 1.14 : 1.1 : 1  // ornn passive health, armor, magic resists modifier
+            const championPassivePyke = this.champion.id === "Pyke" ? 1 / 14 : 0   // pyke passive health to ad ratio
+            const championPassiveRyze = this.champion.id === "Ryze" ? 0.001 : 0   // ryze passive bonus mana %
+            const itemPassiveDemonic = items.includes("4637") ? 0.02 : 0   // demonic embrace % bonus health converted to ability power
+            const itemPassiveSterak = items.includes("3053") ? levelAttackDamage *  0.45 : 0 // sterak's gage bonus attack damage
+            const itemPassiveTitanic = items.includes("3748") ? 0.02 : 0   // titanic hydra's health % converted to attack damage
+            const itemPassiveFimbulwinter = (items.includes("3119") || items.includes("3121")) ? 0.08 : 0   // winter's approach/fimbulwinter passive max mana % converted to health
+            const itemPassiveMuramana = (items.includes("3004") || items.includes("3042")) ? 0.025 : 0 // manamune/muramana passive max mana % converted to attack damage
 
-         let livingForgeHealthModifier = this.champion.id === "Ornn" ? items.find(item => this.mythics.includes(item)) ? 1.14 : 1.1 : 1  // ornn passive
-         const health = Array.from({length: 18}, (_, level) => {
-            let maxMana = this.calculateStat(this.champion.stats.mp, level + 1, this.champion.stats.mpperlevel) + bonusMana
-            let healthFromLevel = this.calculateStat(this.champion.stats.hp, level + 1, this.champion.stats.hpperlevel)
-            let aweHealth = ((items.includes("3119") || items.includes("3121")) && this.champion.partype === "Mana" ? maxMana * 0.08 : 0)   // health from winter's approach/fimbulwinter awe passive
-            return this.champion.id !== "Pyke" ? Math.round(healthFromLevel + ((bonusHealth + aweHealth) * livingForgeHealthModifier)) : Math.round(healthFromLevel)
-         })
+            const finalArmor = levelArmor + ((itemsArmor + miniRuneArmor) * championPassiveOrnnModifier)
+            const finalMagicResists = levelMagicResists + (itemsMagicResists * championPassiveOrnnModifier)
 
-         calculated.health = health
+            let bonusAttackDamage = itemsAttackDamage + itemPassiveSterak
+            let abilityPower = itemsAbilityPower * itemPassiveRabadon
+            let bonusHealth = itemsHealth * championPassiveOrnnModifier
+            let totalMana = levelMana + itemsMana
 
-         if(this.isMain){
-            const [lethality, percentPen] = this.calculateArmorPen(this.$store.getters.filterArmorPenItems(items))
-            const [flatMagicPen, percentMagicPen] = this.calculateMagicPen(this.$store.getters.filterMagicPenItems(items))
+            const {attackDamage: runeAttackDamage, abilityPower: runeAbilityPower} = this.miniRuneAdaptiveForce(this.champion.id, bonusAttackDamage, abilityPower)
 
-            let itemsAttackSpeed = this.sumValuesOf(items, "PercentAttackSpeedMod") + this.legendaries(true).length * (items.includes("6672") ? 0.1 : 0)  // all items + kraken slayer mythic passive
-            let attackSpeedRatio = (this.$store.getters.getASRatioChampions.find(champion => champion[0] == this.champion.id) ? this.$store.getters.getASRatioChampions.find(champion => champion[0] == this.champion.id)[1] : 1)
-            const attackSpeed = this.isMain ? this.champion.id === "Jhin" ? Array.from({length: 18}, (_, level) => {return parseFloat((((3 / 100) * level * (0.7025 + (0.0175 * level)) + 1) * this.champion.stats.attackspeed).toFixed(3))}) // jhin is a special cookie
-               : Array.from({length: 18}, (_, level) => {
-                  let attackSpeedFromLevel = (this.champion.stats.attackspeedperlevel / 100) * (level) * (0.7025 + (0.0175 * (level)))
-                  return parseFloat((this.champion.stats.attackspeed * ((attackSpeedFromLevel + itemsAttackSpeed + miniRuneAttackSpeed) * attackSpeedRatio + 1)).toFixed(3))
-               }).map(attackSpeed => attackSpeed > 2.5 ? 2.5 : attackSpeed) : undefined
-            
-            let itemsAttackDamage = this.sumValuesOf(items, "FlatPhysicalDamageMod")
-            let mythicPassiveAttackDamage = this.legendaries(true).length * (items.includes("6673") ? 5 : 0) + this.legendaries(true).length * (items.includes("3078") ? 3 : 0) // ad from shieldbow/trinity mythic passive
-            let wandererPassiveAttackDamage = (this.champion.id === "Yasuo" || this.champion.id === "Yone") ? this.critChance(items)[1] * 0.4 : 0   // ad from yone/yasuo passive
+            bonusAttackDamage += runeAttackDamage
+            bonusAttackDamage *= championPassiveJhin
+            abilityPower += (runeAbilityPower * itemPassiveRabadon)
 
-            let itemsAbilityPower = this.sumValuesOf(items, "FlatMagicDamageMod")
-            let mythicPassiveAbilityPower = this.legendaries(this.isMain).length * (items.includes("4005") ? 15 : 0) + this.legendaries(this.isMain).length * (items.includes("6656") ? 10 : 0) + this.legendaries(this.isMain).length * (items.includes("4633") ? 8 : 0) // ad from imperial mandate/everfrost/riftmaker mythic passive
-            let crimsonPactBonusAbilityPower = this.champion.id === "Vladimir" ? (itemsHealth + mythicPassiveHealth) / 30 : 0  // did i mention vladimir is my favourite champion?
+            totalMana *= (1 + (abilityPower * championPassiveRyze))
 
-            let dreadAbilityPower = items.includes("3041") ? 125 : 0
-            let abilityPowerModifier = 1 + (items.includes("3089") ? 0.35 : 0)
+            const itemPassiveAweBonusHealth = (totalMana * itemPassiveFimbulwinter) * championPassiveOrnnModifier
+            bonusHealth += itemPassiveAweBonusHealth
 
-            const attackDamage = [], abilityPower = []
-            for(let level = 1; level <= 18; level++){
-               let maxMana = this.calculateStat(this.champion.stats.mp, level, this.champion.stats.mpperlevel) + bonusMana
-               let aweHealth = (items.includes("3119") || items.includes("3121")) && this.champion.partype === "Mana" ? maxMana * 0.08 : 0
+            bonusAttackDamage += championPassiveWindBrothers
 
-               let titanicAttackDamage = this.champion.id !== "Pyke" ? items.includes("3748") ? (itemsHealth + mythicPassiveHealth + aweHealth) * 0.02 : 0 : 0 // ad from titanic hydra passive, pyke gets none :(
-               let aweAttackDamage = ((items.includes("3004") || items.includes("3042")) && this.champion.partype === "Mana" ? maxMana * 0.025 : 0)   // ad from manamune/muramana awe passive
-               let attackDamageFromLevel = this.calculateStat(this.champion.stats.attackdamage, level, this.champion.stats.attackdamageperlevel)
-               let whisperAttackDamageModifier = this.champion.id === "Jhin" ? 1 + (this.jhinPassiveValues[level - 1] + (0.25 * (itemsAttackSpeed + miniRuneAttackSpeed)) + (this.critChance(items)[0] * (items.includes("3124") ? 0 : 0.003))) : 1   // jhin passive modifier
-               let giftOfTheDrownedOnesAttackDamage = this.champion.id === "Pyke" ? (itemsHealth + mythicPassiveHealth + aweHealth) / 14 : 0   // ad from pyke passive
-               let bonusAttackDamage = whisperAttackDamageModifier * (itemsAttackDamage + aweAttackDamage + mythicPassiveAttackDamage + titanicAttackDamage + wandererPassiveAttackDamage + giftOfTheDrownedOnesAttackDamage)  // needed for adaptive force calculation
-               
-               // let aweAbilityPower = ((items.includes("3003") && this.champion.partype === "Mana") ? 0.03 : (items.includes("3003") && this.champion.partype === "Mana") ? 0.05 : 0) * bonusMana
-               let aweAbilityPower = 0 // 11.23.1 seraph/archangel changes
-               let darkPactAbilityPower = items.includes("4637") ? ((bonusHealth + aweHealth) * 0.02) : 0   // demonic embrace passive
-               let calculatedAbilityPower = (itemsAbilityPower + mythicPassiveAbilityPower + crimsonPactBonusAbilityPower + aweAbilityPower + darkPactAbilityPower) * abilityPowerModifier
+            const championPassivePykeBonusAttackDamage = bonusHealth * championPassivePyke
+            bonusAttackDamage += championPassivePykeBonusAttackDamage
 
-               let miniRuneAbilityPower = (calculatedAbilityPower > 0 && (bonusAttackDamage + (5.4 * whisperAttackDamageModifier)) < (calculatedAbilityPower + (9 * abilityPowerModifier))) ? 9 : 0
-               let miniRuneAttackDamage = miniRuneAbilityPower === 0 ? (5.4 * whisperAttackDamageModifier) : 0
+            bonusHealth = this.champion.id === "Pyke" ? 0 : bonusHealth
 
-               const totalAttackDamage = (attackDamageFromLevel * whisperAttackDamageModifier) + bonusAttackDamage + miniRuneAttackDamage
-               const totalAbilityPower = calculatedAbilityPower + ((miniRuneAbilityPower + dreadAbilityPower) * abilityPowerModifier)
+            const championPassiveVladimirBonusAbilityPower = bonusHealth * championPassiveVladimirHealthToAPRatio * itemPassiveRabadon
+            const championPassiveVladimirBonusHealth = (abilityPower * championPassiveVladimirAPToHealthRatio) + (bonusHealth * championPassiveVladimirBonusHealthToApRatio)
+            abilityPower += championPassiveVladimirBonusAbilityPower
+            bonusHealth += championPassiveVladimirBonusHealth
 
-               attackDamage.push(totalAttackDamage); abilityPower.push(totalAbilityPower)
+            const itemPassiveAweBonusAttackDamage = (totalMana * itemPassiveMuramana)
+            bonusAttackDamage += itemPassiveAweBonusAttackDamage * championPassiveJhin
+            const itemPassiveTitanicBonusAttackDamage = (bonusHealth * itemPassiveTitanic)
+            bonusAttackDamage += itemPassiveTitanicBonusAttackDamage * championPassiveJhin
+
+            const itemPassiveDemonicBonusAbilityPower = bonusHealth * itemPassiveDemonic
+            abilityPower += itemPassiveDemonicBonusAbilityPower * itemPassiveRabadon
+
+            if(this.champion.id === "Ryze"){
+               const itemPassiveDemonicChampionPassiveRyzeBonusMana = (levelMana + itemsMana) * (itemPassiveDemonicBonusAbilityPower * itemPassiveRabadon * championPassiveRyze)
+               bonusAttackDamage += itemPassiveDemonicChampionPassiveRyzeBonusMana * itemPassiveMuramana
+
+               const championPassiveRyzeItemFimbulwinterPassiveBonusHealth = itemPassiveDemonicChampionPassiveRyzeBonusMana * itemPassiveFimbulwinter
+               bonusHealth += championPassiveRyzeItemFimbulwinterPassiveBonusHealth
+
+               totalMana += itemPassiveDemonicChampionPassiveRyzeBonusMana
+            }
+            if(this.champion.id === "Vladimir"){
+               const itemPassiveDemonicChampionPassiveVladimirBonusHealth = itemPassiveDemonicBonusAbilityPower * itemPassiveRabadon * championPassiveVladimirAPToHealthRatio
+               bonusHealth += itemPassiveDemonicChampionPassiveVladimirBonusHealth
+
+               const championPassiveVladimirItemPassiveDemonicAbilityPower = itemPassiveDemonicChampionPassiveVladimirBonusHealth * championPassiveVladimirHealthToAPRatio
+               abilityPower += championPassiveVladimirItemPassiveDemonicAbilityPower
+
+               const lastPass = championPassiveVladimirItemPassiveDemonicAbilityPower * championPassiveVladimirAPToHealthRatio
+               bonusHealth += lastPass
+
+               bonusAttackDamage += (itemPassiveDemonicChampionPassiveVladimirBonusHealth + championPassiveVladimirItemPassiveDemonicAbilityPower) * itemPassiveTitanic
             }
 
-            calculated.attackDamage = attackDamage
-            calculated.abilityPower = abilityPower
-            calculated.attackSpeed = attackSpeed
-            calculated.armorPenetration = [lethality, percentPen]
-            calculated.magicPenetration = [flatMagicPen, percentMagicPen]
-            calculated.criticalStrike = [this.critChance(items)[0], this.critDamage(items)]
-         } else{
-            let itemsArmor = this.sumValuesOf(items, "FlatArmorMod")
-            let mythicPassiveArmor = this.legendaries(false).length * (items.includes("3001") ? 5 : 0)
-            let livingForgeArmorModifier = this.champion.id === "Ornn" ? items.find(item => this.mythics.includes(item)) ? 1.14 : 1.1 : 1
-            const armor = Array.from({length: 18}, (_, level) => {
-               let armorFromLevel = this.calculateStat(this.champion.stats.armor, level + 1, this.champion.stats.armorperlevel)
-               return armorFromLevel + ((itemsArmor + miniRuneArmor + mythicPassiveArmor) * livingForgeArmorModifier)
-            })
+            const finalHealth = levelHealth + bonusHealth
+            const finalMana = totalMana
+            const finalAttackDamage = (levelAttackDamage * championPassiveJhin) + bonusAttackDamage
+            const finalAbilityPower = abilityPower
 
-            let itemsMagicResists = this.sumValuesOf(items, "FlatSpellBlockMod")
-            let mythicPassiveMagicResists = this.legendaries(false).length * (items.includes("3001") ? 5 : 0)
-            let livingForgeMagicResistsModifier = this.champion.id === "Ornn" ? items.find(item => this.mythics.includes(item)) ? 1.14 : 1.1 : 1
-            const magicResists = Array.from({length: 18}, (_, level) => {
-               let magicResistsFromLevel = this.calculateStat(this.champion.stats.spellblock, level + 1, this.champion.stats.spellblockperlevel)
-               return magicResistsFromLevel + ((itemsMagicResists + mythicPassiveMagicResists) * livingForgeMagicResistsModifier)
-            })
-
-            calculated.armor = armor
-            calculated.magicResists = magicResists
+            finalHealthArray.push(finalHealth)
+            finalManaArray.push(finalMana)
+            finalAttackDamageArray.push(finalAttackDamage)
+            finalAbilityPowerArray.push(finalAbilityPower)
+            finalArmorArray.push(finalArmor)
+            finalMagicResistsArray.push(finalMagicResists)
          }
+
+         calculated.attackDamage = finalAttackDamageArray
+         calculated.abilityPower = finalAbilityPowerArray
+         calculated.health = finalHealthArray
+         calculated.mana = finalManaArray
+         calculated.armor = finalArmorArray
+         calculated.magicResists = finalMagicResistsArray
+         calculated.attackSpeed = finalAttackSpeedArray
+         calculated.criticalStrike = [finalCritChance, finalCritDamage]
+         calculated.armorPenetration = [finalLethality, finalPercentPhysicalPenetration]
+         calculated.magicPenetration = [finalFlatMagicPenetration, finalPercentMagicalPenetration]
+
          return calculated
       }
    },
@@ -205,6 +231,9 @@ export default {
       },
       mythics(){
          return this.$store.getters.getMythics
+      },
+      adaptiveForceBias(){
+         return this.$store.getters.getAdaptiveForceBias
       },
       armorPenItems(){
          return this.$store.getters.getArmorPenItems
@@ -234,22 +263,33 @@ export default {
          
          if(this.isMain){
             calculated.attackDamage = Math.round(calculated.attackDamage[this.level - 1])
-            if(this.apVisibility){
-               calculated.abilityPower = Math.round(calculated.abilityPower[this.level - 1])
-            } else{
-               delete calculated.abilityPower
-            }
             calculated.armorPenetration = `${calculated.armorPenetration[0]} | ${calculated.armorPenetration[1]}%`
             if(this.apVisibility){
+               calculated.abilityPower = Math.round(calculated.abilityPower[this.level - 1])
                calculated.magicPenetration = `${calculated.magicPenetration[0]} | ${calculated.magicPenetration[1]}%`
             } else{
+               delete calculated.abilityPower
                delete calculated.magicPenetration
             }
             delete calculated.health
+            delete calculated.mana
+            delete calculated.armor
+            delete calculated.magicResists
             calculated.criticalStrike = `${calculated.criticalStrike[0]}% | ${calculated.criticalStrike[1]}%`
             calculated.attackSpeed = calculated.attackSpeed[this.level - 1]
          } else{
-            calculated.health = calculated.health[this.level - 1]
+            if(this.apVisibility && this.champion.partype === "Mana"){
+               calculated.mana = Math.round(calculated.mana[this.level - 1])
+            } else{
+               delete calculated.mana
+            }
+            delete calculated.attackDamage
+            delete calculated.abilityPower
+            delete calculated.attackSpeed
+            delete calculated.armorPenetration
+            delete calculated.magicPenetration
+            delete calculated.criticalStrike
+            calculated.health = ~~calculated.health[this.level - 1]
             calculated.armor = Math.round(calculated.armor[this.level - 1])
             calculated.magicResists = Math.round(calculated.magicResists[this.level - 1])
          }
@@ -259,6 +299,7 @@ export default {
       tooltipTitles(){
          return {
             armorPenetration: "lethality | armor penetration",
+            magicPenetration: "flat penetration | percentage penetration",
             criticalStrike: "critical strike chance | critical strike damage"
          }
       },

@@ -1,8 +1,8 @@
 import { createStore } from 'vuex'; import * as championData from '@/assets/champion.json'; import * as itemData from '@/assets/item.json'
-const uselessItems = [1035, 1039, 1040, 1500, 1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, 1510, 1511, 1512, 1513, 1514, 1515, 1516, 1517, 1518, 1519, 2003, 2010, 2031, 2033, 2052, 2055, 2138, 2139, 2140, 2403, 2419, 2420, 2421, 2423, 2424, 3513, 3599, 3600, 4403, 3330, 3340, 3363, 3364, 3400, 3901, 3902, 3903, 7050]
+const uselessItems = [1035, 1039, 1040, 1500, 1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, 1510, 1511, 1512, 1513, 1514, 1515, 1516, 1517, 1518, 1519, 2003, 2010, 2031, 2033, 2052, 2055, 2138, 2139, 2140, 2403, 2419, 2420, 2421, 2423, 2424, 3330, 3340, 3363, 3364, 3400, 3513, 3599, 3600, 3901, 3902, 3903, 4403, 4638, 4643, 7050]
 const Ornnaments = [7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 7016, 7017, 7018, 7019, 7020, 7021, 7022, 7023, 7024]
-uselessItems.forEach(item => {delete itemData.data[item]})
-Ornnaments.forEach(item => {delete itemData.data[item]})
+uselessItems.forEach(id => {delete itemData.data[id]})
+Ornnaments.forEach(id => {delete itemData.data[id]})
 
 export default createStore({
    state: {
@@ -10,6 +10,10 @@ export default createStore({
       champions: championData.data,
       items: itemData.data,
       mythics: ["6693", "6692", "6691", "6673", "6672", "6671", "6664", "6662", "6656", "6655", "6653", "6632", "6631", "6630", "6617", "6616", "4644", "4636", "4633", "4005", "3190", "3152", "3078", "3068", "3001", "2065"],
+      adaptiveForceBias: {
+         attackDamage: ["Aatrox", "Akshan", "Aphelios", "Ashe", "Belveth", "Blitzcrank", "Braum", "Caitlyn", "Camille", "Corki", "Darius", "Draven", "DrMundo", "Ezreal", "Fiora", "Gangplank", "Garen", "Gnar", "Graves", "Hecarim", "Illaoi", "Irelia", "JarvanIV", "Jax", "Jayce", "Jhin", "Jinx", "Kaisa", "Kalista", "Kayle", "Kayn", "Khazix", "Kindred", "Kled", "KogMaw", "LeeSin", "Leona", "Lucian", "MasterYi", "MissFortune", "MonkeyKing", "Nasus", "Nocturne", "Olaf", "Ornn", "Pantheon", "Poppy", "Pyke", "Qiyana", "Quinn", "Rammus", "RekSai", "Rell", "Renekton", "Rengar", "Riven", "Samira", "Senna", "Sett", "Shaco", "Shen", "Shyvana", "Sion", "Sivir", "Skarner", "TahmKench", "Talon", "Taric", "Thresh", "Tristana", "Trundle", "Tryndamere", "Twitch", "Udyr", "Urgot", "Varus", "Vayne", "Vi", "Viego", "Volibear", "Warwick", "Xayah", "XinZhao", "Yasuo", "Yone", "Yorick", "Zed", "Zeri"],
+         abilityPower: ["Ahri", "Akali", "Alistar", "Amumu", "Anivia", "Annie", "AurelionSol", "Azir", "Bard", "Brand", "Cassiopeia", "Chogath", "Diana", "Ekko", "Elise", "Evelynn", "Fiddlesticks", "Fizz", "Galio", "Gragas", "Gwen", "Heimerdinger", "Ivern", "Janna", "Karma", "Karthus", "Kassadin", "Katarina", "Kennen", "Leblanc", "Lillia", "Lissandra", "Lulu", "Lux", "Malphite", "Malzahar", "Maokai", "Mordekaiser", "Morgana", "Nami", "Nautilus", "Neeko", "Nidalee", "Nunu", "Orianna", "Rakan", "Renata", "Rumble", "Ryze", "Sejuani", "Seraphine", "Singed", "Sona", "Soraka", "Swain", "Sylas", "Syndra", "Taliyah", "Teemo", "TwistedFate", "Veigar", "Velkoz", "Vex", "Viktor", "Vladimir", "Xerath", "Yuumi", "Zac", "Ziggs", "Zilean", "Zoe", "Zyra"]
+      },
       armorPenItems: [
          {id: "3035", percentage: 0.18, lethality: 0}, // last whisper
          {id: "3036", percentage: 0.3, lethality: 0},// lord dominik's regards
@@ -42,8 +46,9 @@ export default createStore({
          {id: "3036", description: "deal 0-15% bonus attack damage depending on maximum health difference."},  // lord dominik's regards
          // {id: "3040", description: "bonus ability power equal to 5% maximum mana."}, // seraph's embrace
          {id: "3041", description: "+125 ability power (fully stacked)."}, // mejai
-         {id: "3042", description: "bonus attack damage equal to 2.5% maximum mana."}, // muramana
+         {id: "3042", description: "bonus attack damage equal to 2.5% maximum mana. Basic attacks deal 1.5% maximum mana bonus physical damage on-hit."}, // muramana
          {id: "3047", description: "reduces damage from basic attacks by 12%."}, // plated steelcaps
+         {id: "3053", description: "+45% base attack damage as bonus attack damage."}, // sterak's gage
          {id: "3068", description: "+50 health per other legendary item."},   // sunfire aegis
          {id: "3078", description: "3 bonus attack damage per other legendary item."}, // trinity force
          {id: "3089", description: "increases ability power by 35%."}, // rabadon's deathcap
@@ -68,7 +73,7 @@ export default createStore({
          {id: "6692", description: "+4% armor penetration per other legendary item."}, // eclipse
          {id: "6693", description: "+5 lethality per other legendary item."}, // prowler's claw
       ],
-      asRatioChampions: [
+      asRatioChampions: [  // https://leagueoflegends.fandom.com/wiki/List_of_champions/Attack_speed | AS Ratio / Base
          ["Akshan", 0.6269592476489028],
          ["Amumu", 0.8668478260869565],
          ["Caitlyn", 0.8340675477239354],
@@ -167,6 +172,9 @@ export default createStore({
       },
       getMythics(state){
          return state.mythics
+      },
+      getAdaptiveForceBias(state){
+         return state.adaptiveForceBias
       },
       getArmorPenItems(state){
          return state.armorPenItems

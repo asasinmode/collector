@@ -1,6 +1,6 @@
 <template>
    <div class="modalOverlay" @click.self="$emit('closeMe')">
-      <div class="modalContainer">
+      <div class="modalContainer" @keydown.esc="$emit('closeMe')">
          <div class="searchbarContainer centered">
             <input type="text" class="searchbar" v-model="textFilter" placeholder="search for champion..." />
          </div>

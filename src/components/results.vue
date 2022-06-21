@@ -35,7 +35,7 @@ export default {
    name: 'results',
    data(){
       return {
-         strikeType: "averageStrike",
+         strikeType: "nonCriticalStrike",
          levelSetting: "Equal",
          graphColors: [265, 120, 0]
       }
@@ -98,50 +98,57 @@ export default {
          this.chart.update()
       },
       calculateDamage(mainStats, mainItems, mainLevel, targetLevel){
-         let attackDamageModifier = this.champion(true).id === "Kalista" ? 0.9 : 1
-         var targetHealth = this.targetStats.health[targetLevel - 1]
-         let basicAttackDamageModifier = this.selectedItems(false).includes("3047") ? 0.88 : 1
+         const attackDamageModifier = this.champion(true).id === "Kalista" ? 0.9 : 1
+         const targetHealth = this.targetStats.health[targetLevel - 1]
+         // const targetHealth = 1000 // dummy
+         const basicAttackDamageModifier = this.selectedItems(false).includes("3047") ? 0.88 : 1
 
-         // var targetHealth = 1000
          const healthDifference = ((targetHealth - mainStats.health[mainLevel - 1]) / 100) > 20 ? 20 : ((targetHealth - mainStats.health[mainLevel - 1]) / 100) < 0 ? 0 : ((targetHealth - mainStats.health[mainLevel - 1]) / 100)
          const physicalDamageModifier = (mainItems.includes("3036") ? ((healthDifference * 0.0075) + 1) : 1)
+         const [physicalOnHitDamage, magicalOnHitDamage] = this.onHitDamage(mainStats, mainLevel, mainItems)
 
          const criticalStrikeDamageModifier = mainItems.includes("3124") ? 1 : mainStats.criticalStrike[1] / 100
          const magicDamageModifier = 1
 
+         const corkiPhysicalModifier = this.champion(true).id === "Corki" ? 0.2 : 1
+         const corkiMagicalModifier = this.champion(true).id === "Corki" ? 0.8 : 0
+         const belVethModifier = this.champion(true).id === "Belveth" ? 0.75 : 1
+
          const nonCriticalStrike = {
-            physicalDamage: ((mainStats.attackDamage[mainLevel - 1] * attackDamageModifier * (this.champion(true).id === "Corki" ? 0.2 : 1) * basicAttackDamageModifier) + this.onHitDamage(mainStats, mainLevel, mainItems)[0]) * physicalDamageModifier,
-            magicDamage: (this.onHitDamage(mainStats, mainLevel, mainItems)[1] + (mainStats.attackDamage[mainLevel - 1] * (this.champion(true).id === "Corki" ? 0.8 : 0) * basicAttackDamageModifier)) * magicDamageModifier
+            physicalDamage: ((mainStats.attackDamage[mainLevel - 1] * attackDamageModifier * corkiPhysicalModifier * basicAttackDamageModifier) + physicalOnHitDamage) * physicalDamageModifier * belVethModifier,
+            magicDamage: (magicalOnHitDamage + (mainStats.attackDamage[mainLevel - 1] * corkiMagicalModifier * basicAttackDamageModifier)) * magicDamageModifier * belVethModifier
          }
          const criticalStrike = {
-            physicalDamage: ((mainStats.attackDamage[mainLevel - 1] * attackDamageModifier * (this.champion(true).id === "Corki" ? 0.2 : 1) * criticalStrikeDamageModifier * basicAttackDamageModifier) + this.onHitDamage(mainStats, mainLevel, mainItems)[0]) * physicalDamageModifier,
-            magicDamage: (this.onHitDamage(mainStats, mainLevel, mainItems)[1] + (mainStats.attackDamage[mainLevel - 1] * criticalStrikeDamageModifier * (this.champion(true).id === "Corki" ? 0.8 : 0) * basicAttackDamageModifier)) * magicDamageModifier
+            physicalDamage: ((mainStats.attackDamage[mainLevel - 1] * attackDamageModifier * corkiPhysicalModifier * criticalStrikeDamageModifier * basicAttackDamageModifier) + physicalOnHitDamage) * physicalDamageModifier * belVethModifier,
+            magicDamage: (magicalOnHitDamage + (mainStats.attackDamage[mainLevel - 1] * criticalStrikeDamageModifier * corkiMagicalModifier * basicAttackDamageModifier)) * magicDamageModifier * belVethModifier
          }
          const averageStrike = {
-            physicalDamage: ((mainStats.attackDamage[mainLevel - 1] * attackDamageModifier * basicAttackDamageModifier * (this.champion(true).id === "Corki" ? 0.2 : 1) * (1 + ((mainStats.criticalStrike[0] / 100) * (criticalStrikeDamageModifier - 1)))) + this.onHitDamage(mainStats, mainLevel, mainItems)[0]) * physicalDamageModifier,
-            magicDamage: (this.onHitDamage(mainStats, mainLevel, mainItems)[1] + (mainStats.attackDamage[mainLevel - 1] * (1 + ((mainStats.criticalStrike[0] / 100) * (criticalStrikeDamageModifier - 1))) * basicAttackDamageModifier * (this.champion(true).id === "Corki" ? 0.8 : 0))) * magicDamageModifier
+            physicalDamage: ((mainStats.attackDamage[mainLevel - 1] * attackDamageModifier * basicAttackDamageModifier * corkiPhysicalModifier * (1 + ((mainStats.criticalStrike[0] / 100) * (criticalStrikeDamageModifier - 1)))) + physicalOnHitDamage) * physicalDamageModifier * belVethModifier,
+            magicDamage: (magicalOnHitDamage + (mainStats.attackDamage[mainLevel - 1] * (1 + ((mainStats.criticalStrike[0] / 100) * (criticalStrikeDamageModifier - 1))) * basicAttackDamageModifier * corkiMagicalModifier)) * magicDamageModifier * belVethModifier
          }
          var effectiveArmor = (this.targetStats.armor[targetLevel - 1] - (mainStats.armorPenetration[0] * (0.6 + (0.4 * mainLevel / 18)))) * (1 - (mainStats.armorPenetration[1] / 100))
-         // var effectiveArmor = (0 - (mainStats.armorPenetration[0] * (0.6 + (0.4 * mainLevel / 18)))) * (1 - (mainStats.armorPenetration[1] / 100))
-         effectiveArmor = effectiveArmor < 0 ? 0 : effectiveArmor
          var effectiveMagicResists = (this.targetStats.magicResists[targetLevel - 1] - mainStats.magicPenetration[0]) * (1 -(mainStats.magicPenetration[1] / 100))
-         // var effectiveMagicResists = (0 - mainStats.magicPenetration[0]) * (1 -(mainStats.magicPenetration[1] / 100))
+
+         // effectiveArmor = (0 - (mainStats.armorPenetration[0] * (0.6 + (0.4 * mainLevel / 18)))) * (1 - (mainStats.armorPenetration[1] / 100)) // dummy
+         // effectiveMagicResists = (0 - mainStats.magicPenetration[0]) * (1 -(mainStats.magicPenetration[1] / 100))   // dummy
+
+         effectiveArmor = effectiveArmor < 0 ? 0 : effectiveArmor
          effectiveMagicResists = effectiveMagicResists < 0 ? 0 : effectiveMagicResists
 
          return {
             nonCriticalStrike: {
                physicalDamage: nonCriticalStrike.physicalDamage * (100 / (100 + effectiveArmor)),
-               magicDamageModifier: nonCriticalStrike.magicDamage * (100 / (100 + effectiveMagicResists)),
+               magicDamage: nonCriticalStrike.magicDamage * (100 / (100 + effectiveMagicResists)),
                totalDamage: (nonCriticalStrike.physicalDamage * (100 / (100 + effectiveArmor))) + (nonCriticalStrike.magicDamage * (100 / (100 + effectiveMagicResists)))
             },
             criticalStrike: {
                physicalDamage: criticalStrike.physicalDamage * (100 / (100 + effectiveArmor)),
-               magicDamageModifier: criticalStrike.magicDamage * (100 / (100 + effectiveMagicResists)),
+               magicDamage: criticalStrike.magicDamage * (100 / (100 + effectiveMagicResists)),
                totalDamage: (criticalStrike.physicalDamage * (100 / (100 + effectiveArmor))) + (criticalStrike.magicDamage * (100 / (100 + effectiveMagicResists)))
             },
             averageStrike: {
                physicalDamage: averageStrike.physicalDamage * (100 / (100 + effectiveArmor)),
-               magicDamageModifier: averageStrike.magicDamage * (100 / (100 + effectiveMagicResists)),
+               magicDamage: averageStrike.magicDamage * (100 / (100 + effectiveMagicResists)),
                totalDamage: (averageStrike.physicalDamage * (100 / (100 + effectiveArmor))) + (averageStrike.magicDamage * (100 / (100 + effectiveMagicResists)))
             }
          }
@@ -170,8 +177,9 @@ export default {
          const onHitTitanic = items.includes("3748") ? ((this.isRanged(true) ? 3 : 4) + (stats.health[level - 1] * (this.isRanged(true) ? 0.01125 : 0.015))) : 0
          const onHitWitsEnd = items.includes("3091") ? ([15, 15, 15, 15, 15, 15, 15, 15, 25, 35, 45, 55, 65, 75, 76.25, 77.5, 78.75, 80])[level - 1] : 0
          const onHitNashorsTooth = items.includes("3115") ? 15 + (stats.abilityPower[level - 1] * 0.2) : 0
+         const onHitMuramana = items.includes("3042") ? (stats.mana[level - 1] * 0.015) : 0
 
-         const physicalDamage = onHitGuinsoo + onHitTitanic + (items.includes("1043") ? 15 : 0)
+         const physicalDamage = onHitGuinsoo + onHitTitanic + (items.includes("1043") ? 15 : 0) + onHitMuramana
          const magicDamage = onHitWitsEnd + onHitNashorsTooth
          return [physicalDamage, magicDamage]
       },

@@ -38,6 +38,7 @@
             <p><strong>Mini runes</strong>, with attack speed, adaptive force and armor being selected for both main and target champion (+10% attack speed, +9 adaptive force, +6 armor). At the moment there is no way of changing them, if it's a heavily requested feature I'll consider adding the option to do so.</p><br/>
             <p><strong>Champion innate passives</strong>, like <a href="https://leagueoflegends.fandom.com/wiki/Ornn/LoL#Living_Forge" target="_blank">Ornn's Passive</a>, <a href="https://leagueoflegends.fandom.com/wiki/Vladimir/LoL#Crimson_Pact" target="_blank">Vladimir's Passive</a>, <a href="https://leagueoflegends.fandom.com/wiki/Jhin/LoL#Whisper" target="_blank">Jhin's Passive</a>.</p><p class="indent">This however <b>does not include</b> basic/ultimate ability passives like <a href="https://leagueoflegends.fandom.com/wiki/Poppy/LoL#Steadfast_Presence" target="_blank">Poppy's W</a>, <a href="https://leagueoflegends.fandom.com/wiki/Garen/LoL#Courage" target="_blank">Garen's W</a>, <a href="https://leagueoflegends.fandom.com/wiki/Malphite/LoL#Thunderclap" target="_blank">Malphite's W</a>.</p>
             <p>List of champion passives accounted for</p>
+               <p class="fakeList">Bel'Veth</p>
                <p class="fakeList">Corki</p>
                <p class="fakeList">Jhin</p>
                <p class="fakeList">Kalista</p>
@@ -45,6 +46,7 @@
                <p class="fakeList">Ornn</p>
                <p class="fakeList">Orianna</p>
                <p class="fakeList">Pyke</p>
+               <p class="fakeList">Ryze</p>
                <p class="fakeList">Vladimir</p>
                <p class="fakeList">Yasuo/Yone</p><br/>
             <p><strong>Item/mythic passives</strong>. If the item displays little black square in it's top right corner with letter "P" inside, it means it's passive is included in calculations.</p>
@@ -111,7 +113,7 @@
                <p>Toggles the visibility of graph settings tooltips.</p>
             </div>
             <div class="infoToggleContainer">
-               <h3 class="centered">toggle ap/magic penetration visibility</h3>
+               <h3 class="centered">toggle ap/magic penetration/mana visibility</h3>
                <div class="infoToggleButtonContainer centered">
                   <button class="button infoToggleButton" @click="toggle('setApVisibility')">
                      <div>on</div>
@@ -119,7 +121,7 @@
                      <div class="infoToggleButtonHighlight" :class="{on: apVisibility}" />
                   </button>
                </div>
-               <p>Toggles the visibility of ability power and magic penetration on main champion.</p>
+               <p>Toggles the visibility of ability power and magic penetration on main champion and mana on target champion.</p>
             </div>
          </div>
          <div class="infoContent" v-else-if="infoIndex === 5">

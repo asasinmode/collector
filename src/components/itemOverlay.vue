@@ -1,6 +1,6 @@
 <template>
    <div class="modalOverlay" @click.self="$emit('closeMe')">
-      <div class="modalContainer">
+      <div class="modalContainer" @keydown.esc="$emit('closeMe')">
          <div class="searchbarContainer centered">
             <input type="text" class="searchbar" v-model="textFilter" placeholder="search for item..." />
          </div>
@@ -40,7 +40,6 @@ export default {
       },
       selectItem(itemName, isForMe){
          let tempCopy = [...this.selectedItems(isForMe)]
-         console.log(itemName)
          if(tempCopy.includes(itemName)){
             tempCopy = tempCopy.filter(item => item != itemName)
          } else{
