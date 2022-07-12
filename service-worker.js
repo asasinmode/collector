@@ -25,7 +25,7 @@ self.addEventListener('fetch', function(event) {
             if(!cacheResponse){console.log("attempting to fetch", event.request.clone())}
             return cacheResponse || fetch(event.request.clone()).then(fetchResponse => {
                console.log("succesfully fetched", event.request.url, "putting in cache")
-               caches.put(event.request, fetchResponse.clone())
+               cache.put(event.request, fetchResponse.clone())
                console.log("returning", fetchResponse)
                console.log("fetch response after console log", fetchResponse)
                return fetchResponse
