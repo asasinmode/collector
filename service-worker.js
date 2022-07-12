@@ -20,16 +20,18 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', function(event) {
    if(event.request.destination === "image"){
-      event.respondWith(
-         caches.match(event.request).then(response => {
-            if(!response){console.log("attempting to fetch", event.request)}
-            return response || fetch(event.request).then(fetchResponse => {
-               console.log("successfully fetched, putting in cache and returning", fetchResponse)
-               caches.put(event.request, fetchResponse)
+      event.respondWith(caches.open(CURRENT_CACHES.images).then(async cache => {
+         return cache.match(event.request).then(cacheResponse => {
+            if(!cacheResponse){console.log("attempting to fetch", event.request.clone())}
+            return cacheResponse || fetch(event.request.clone()).then(fetchResponse => {
+               console.log("succesfully fetched", event.request.url, "putting in cache")
+               caches.put(event.request, fetchResponse.clone())
+               console.log("returning", fetchResponse)
+               console.log("fetch response after console log", fetchResponse)
                return fetchResponse
             })
          })
-      )
+      }))
       // event.respondWith(
       //    caches.open(CURRENT_CACHES.images).then(async cache => {
       //       const response = await cache.match(event.request).then(response => {
