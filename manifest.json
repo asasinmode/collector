@@ -4,8 +4,8 @@
    "description": "Damage calculator for League of Legends. Calculate the damage of any champion with any build vs any target.",
    "display": "standalone",
    "lang": "en-US",
-   "scope": "/collector",
-   "start_url": "/collector",
+   "scope": "/collector/",
+   "start_url": ".",
    "background_color": "#000",
    "theme_color": "#fff",
    "icons": [
@@ -31,6 +31,13 @@
          "src": "/collector/thumbnail.jpg",
          "type": "image/jpg",
          "sizes": "1280x640"
+      }
+   ],
+   "prefer_related_applications": true,
+   "related_applications": [
+      {
+         "platform": "webapp",
+         "url": "https://asasinmode.github.io/collector/"
       }
    ]
 }
