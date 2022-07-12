@@ -1,0 +1,29 @@
+{
+   "short_name": "Collector",
+   "name": "Collector - LoL damage calculator",
+   "description": "Damage calculator for League of Legends. Calculate the damage of any champion with any build vs any target.",
+   "display": "standalone",
+   "lang": "en-US",
+   "scope": "/",
+   "start_url": ".",
+   "background_color": "#000",
+   "icons": [
+      {
+         "src": "/collector/favicon.ico",
+         "type": "image/x-icon",
+         "sizes": "144x144"
+      },
+      {
+         "src": "/collector/favicon.webp",
+         "type": "image/webp",
+         "sizes": "144x144"
+      }
+   ],
+   "screenshots": [
+      {
+         "src": "/collector/thumbnail.jpg",
+         "type": "image/jpg",
+         "sizes": "1280x640"
+      }
+   ]
+}
