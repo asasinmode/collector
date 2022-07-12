@@ -7,16 +7,24 @@
    "scope": "/",
    "start_url": ".",
    "background_color": "#000",
+   "theme_color": "#fff",
    "icons": [
-      {
-         "src": "/collector/favicon.ico",
-         "type": "image/x-icon",
-         "sizes": "144x144"
-      },
       {
          "src": "/collector/favicon.webp",
          "type": "image/webp",
-         "sizes": "144x144"
+         "sizes": "144x144",
+         "purpose": "maskable any"
+      },
+      {
+         "src": "/collector/apple.png",
+         "type": "image/png",
+         "sizes": "192x192",
+         "purpose": "maskable any"
+      },
+      {
+         "src": "/collector/splash.png",
+         "type": "image/png",
+         "sizes": "512x512"
       }
    ],
    "screenshots": [
