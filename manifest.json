@@ -4,8 +4,8 @@
    "description": "Damage calculator for League of Legends. Calculate the damage of any champion with any build vs any target.",
    "display": "standalone",
    "lang": "en-US",
-   "scope": "/",
-   "start_url": "/",
+   "scope": "/collector",
+   "start_url": "/collector",
    "background_color": "#000",
    "theme_color": "#fff",
    "icons": [
