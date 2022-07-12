@@ -12,14 +12,13 @@
       {
          "src": "/collector/favicon.webp",
          "type": "image/webp",
-         "sizes": "144x144",
-         "purpose": "maskable any"
+         "sizes": "144x144"
       },
       {
          "src": "/collector/apple.png",
          "type": "image/png",
          "sizes": "192x192",
-         "purpose": "maskable any"
+         "purpose": "maskable"
       },
       {
          "src": "/collector/splash.png",
